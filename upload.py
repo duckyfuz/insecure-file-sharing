@@ -1,6 +1,8 @@
 import hashlib
 import boto3
 import sys
+import base64
+import os
 
 
 def hash_file(file_path):
@@ -40,6 +42,34 @@ def upload_to_s3(file_path, bucket_name):
     except Exception as e:
         print(f"Error uploading file: {e}")
 
+
+def lambda_handler(event, context):
+    try:
+        # Decode the base64 file content
+        file_content = base64.b64decode(event['file_content'])
+        file_name = event['file_name']
+        bucket_name = event.get('bucket_name', 'ifs-storage-bucket')
+
+        # Save the file content to a temporary file
+        temp_file_path = f"/tmp/{file_name}"
+        with open(temp_file_path, "wb") as temp_file:
+            temp_file.write(file_content)
+
+        # Upload the temporary file to S3
+        file_key_with_extension = upload_to_s3(temp_file_path, bucket_name)
+
+        # Delete the temporary file after uploading
+        os.remove(temp_file_path)
+
+        return {
+            'statusCode': 200,
+            'body': f"File uploaded successfully with key: {file_key_with_extension}"
+        }
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'body': f"Error uploading file: {e}"
+        }
 
 if __name__ == "__main__":
     if len(sys.argv) < 2 or len(sys.argv) > 3:
