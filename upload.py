@@ -36,8 +36,7 @@ def upload_to_s3(file_path, bucket_name):
                 ]
             },
         )
-        print(f"File uploaded successfully with key: {file_key_with_extension}")
-        print(f"File URL: https://ifs.kenf.dev/{file_key_with_extension}")
+        return file_key_with_extension
     except Exception as e:
         print(f"Error uploading file: {e}")
 
@@ -50,4 +49,7 @@ if __name__ == "__main__":
     file_path = sys.argv[1]
     bucket_name = sys.argv[2] if len(sys.argv) == 3 else "ifs-storage-bucket"
 
-    upload_to_s3(file_path, bucket_name)
+    file_key_with_extension = upload_to_s3(file_path, bucket_name)
+    print(f"File uploaded successfully with key: {file_key_with_extension}")
+    print(f"File URL: https://ifs.kenf.dev/{file_key_with_extension}")
+     
