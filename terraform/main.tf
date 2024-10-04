@@ -7,9 +7,9 @@ provider "aws" {
   alias  = "us-east-1"
 }
 
-provider "cloudflare" {
-  api_token = var.cloudflare_api_token
-}
+# provider "cloudflare" {
+#   api_token = var.cloudflare_api_token
+# }
 
 terraform {
   backend "s3" {
