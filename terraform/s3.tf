@@ -3,6 +3,19 @@ resource "aws_s3_bucket" "main_bucket" {
   force_destroy = true
 }
 
+resource "aws_s3_bucket_cors_configuration" "example" {
+  bucket = aws_s3_bucket.example.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["PUT", "POST"]
+    allowed_origins = ["https://ifs.kenf.dev"]
+    expose_headers  = ["ETag"]
+    max_age_seconds = 3000
+  }
+}
+
+
 resource "aws_s3_bucket_public_access_block" "allow_public_acl" {
   bucket = aws_s3_bucket.main_bucket.id
 
@@ -45,18 +58,6 @@ resource "aws_s3_bucket_policy" "main_bucket_policy" {
         }
         Action   = "s3:GetObject"
         Resource = "${aws_s3_bucket.main_bucket.arn}/*"
-      },
-      {
-        Sid    = "AllowPutFromPresignedUrl"
-        Effect = "Allow"
-        Principal = "*"
-        Action   = "s3:PutObject"
-        Resource = "${aws_s3_bucket.main_bucket.arn}/*"
-        Condition = {
-          StringEquals = {
-            "aws:Referer" = "https://ifs.kenf.dev"
-          }
-        }
       }
     ]
   })
