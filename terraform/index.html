@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>File Upload</title>
+  </head>
+  <body>
+    <h1>Upload PDF to API</h1>
+
+    <!-- File Input -->
+    <input type="file" id="fileInput" accept=".pdf" />
+    <br /><br />
+
+    <!-- Upload Button -->
+    <button onclick="uploadFile()">Upload File</button>
+
+    <!-- Output -->
+    <div id="output"></div>
+
+    <script>
+      function uploadFile() {
+        const fileInput = document.getElementById("fileInput");
+        const file = fileInput.files[0];
+
+        if (!file) {
+          alert("Please select a file first.");
+          return;
+        }
+
+        const reader = new FileReader();
+
+        // Read the file content and encode it to base64
+        reader.onload = function (event) {
+          const fileContent = btoa(event.target.result);
+
+          const payload = {
+            file_name: file.name,
+            file_content: fileContent,
+          };
+
+          // Send the POST request to your API endpoint
+          fetch(
+            "https://mhn6js3scpmd3ms4h2zu45k3lq0qeedc.lambda-url.ap-southeast-1.on.aws/",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(payload),
+            }
+          )
+            .then((response) => response.json())
+            .then((data) => {
+              document.getElementById("output").innerText =
+                "Upload successful! Response: " + JSON.stringify(data);
+            })
+            .catch((error) => {
+              document.getElementById("output").innerText =
+                "Error uploading file: " + error;
+            });
+        };
+
+        // Read the file as binary string
+        reader.readAsBinaryString(file);
+      }
+    </script>
+  </body>
+</html>
