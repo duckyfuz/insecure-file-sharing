@@ -24,7 +24,6 @@ resource "aws_s3_object" "index_html" {
   bucket       = aws_s3_bucket.main_bucket.bucket
   key          = "index.html"
   content_type = "text/html"
-  source       = "index.html"
   etag         = filemd5("index.html")
 
   content = templatefile("index.html", {
