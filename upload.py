@@ -71,6 +71,9 @@ def lambda_handler(event, context):
         file_name = json.loads(event["body"])["file_name"]
         bucket_name = "ifs-storage-bucket"
 
+        if len(file_content) > 5 * 1024 * 1024:
+            return {"statusCode": 413, "body": "File size exceeds the 5MB limit"}
+
         # Save the file content to a temporary file
         temp_file_path = f"/tmp/{file_name}"
         with open(temp_file_path, "wb") as temp_file:
