@@ -116,7 +116,7 @@
         };
 
         const payload = {
-          file_name: file.name,
+          file_name: newFileName,
         };
 
         const apiUrl = "${api_url}";
@@ -131,12 +131,10 @@
           .then((response) => response.json())
           .then((data) => {
             const presignedUrl = data.presigned_url;
-            const formData = new FormData();
-            formData.append("file", file);
 
             fetch(presignedUrl, {
               method: "PUT",
-              body: formData,
+              body: file, // Sending the file directly
             })
               .then((uploadResponse) => {
                 if (uploadResponse.ok) {
