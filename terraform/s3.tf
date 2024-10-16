@@ -58,6 +58,18 @@ resource "aws_s3_bucket_policy" "main_bucket_policy" {
         }
         Action   = "s3:GetObject"
         Resource = "${aws_s3_bucket.main_bucket.arn}/*"
+      },
+      {
+        Sid    = "AllowIfsDomainAccess"
+        Effect = "Allow"
+        Principal = "*"
+        Action   = "s3:PutObject"
+        Resource = "${aws_s3_bucket.main_bucket.arn}/*"
+        Condition = {
+          StringEquals = {
+            "aws:Referer" = "https://ifs.kenf.dev"
+          }
+        }
       }
     ]
   })
