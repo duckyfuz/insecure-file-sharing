@@ -85,111 +85,78 @@
 
         const reader = new FileReader();
 
-        reader.onload = function (event) {
-          const fileContent = event.target.result;
-          const hash = sha256(fileContent);
+        // Define fileContent variable in the appropriate scope
+        let fileContent;
 
-          document.getElementById("output").innerText = "File hash: " + hash;
+        reader.onload = function (event) {
+          fileContent = event.target.result;
+          // Call sha256 and handle the promise
+          sha256(fileContent).then((hash) => {
+            document.getElementById("output").innerText = "File hash: " + hash;
+
+            const shortHash = hash.slice(0, 4);
+            const fileExtension = file.name.split(".").pop();
+            const newFileName = shortHash + "." + fileExtension;
+            document.getElementById("output").innerText +=
+              " New file name: " + newFileName;
+
+            const payload = {
+              file_name: newFileName,
+            };
+
+            const apiUrl = "${api_url}"; // Replace with your actual API URL
+
+            // Fetch the presigned URL
+            fetch(apiUrl, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(payload),
+            })
+              .then((response) => {
+                if (!response.ok) {
+                  throw new Error(
+                    "Error fetching presigned URL: " + response.statusText
+                  );
+                }
+                return response.json();
+              })
+              .then((data) => {
+                const presignedUrl = data.presigned_url;
+
+                // Upload the file to the presigned URL
+                return fetch(presignedUrl, {
+                  method: "PUT",
+                  body: file, // Sending the file directly
+                });
+              })
+              .then((uploadResponse) => {
+                if (uploadResponse.ok) {
+                  document.getElementById("output").innerText =
+                    "Upload successful! File name: " + newFileName;
+                } else {
+                  throw new Error(
+                    "Error uploading file to S3: " + uploadResponse.statusText
+                  );
+                }
+              })
+              .catch((error) => {
+                document.getElementById("output").innerText = error.message;
+              });
+          });
         };
 
-        reader.readAsBinaryString(file);
+        reader.readAsBinaryString(file); // Initiate reading the file
 
         function sha256(str) {
           const buffer = new TextEncoder().encode(str);
           return crypto.subtle.digest("SHA-256", buffer).then((hash) => {
-            return Array.prototype.map
-              .call(new Uint8Array(hash), (x) =>
-                ("00" + x.toString(16)).slice(-2)
-              )
+            return Array.from(new Uint8Array(hash))
+              .map((x) => ("00" + x.toString(16)).slice(-2))
               .join("");
           });
         }
-
-        reader.onloadend = function () {
-          const fileExtension = file.name.split(".").pop();
-          sha256(fileContent).then((hash) => {
-            const shortHash = hash.slice(0, 4);
-            const newFileName = shortHash + "." + fileExtension;
-            document.getElementById("output").innerText +=
-              "New file name: " + newFileName;
-          });
-        };
-
-        const payload = {
-          file_name: newFileName,
-        };
-
-        const apiUrl = "${api_url}";
-
-        fetch(apiUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            const presignedUrl = data.presigned_url;
-
-            fetch(presignedUrl, {
-              method: "PUT",
-              body: file, // Sending the file directly
-            })
-              .then((uploadResponse) => {
-                if (uploadResponse.ok) {
-                  document.getElementById("output").innerText =
-                    "Upload successful! File name: " + file.name;
-                } else {
-                  document.getElementById("output").innerText =
-                    "Error uploading file to S3: " + uploadResponse.statusText;
-                }
-              })
-              .catch((uploadError) => {
-                document.getElementById("output").innerText =
-                  "Error uploading file to S3: " + uploadError;
-              });
-          })
-          .catch((error) => {
-            document.getElementById("output").innerText =
-              "Error fetching presigned URL: " + error;
-          });
-
-        // const reader = new FileReader();
-
-        // // Read the file content and encode it to base64
-        // reader.onload = function (event) {
-        //   const fileContent = btoa(event.target.result);
-
-        //   const payload = {
-        //     file_name: file.name,
-        //     file_content: fileContent,
-        //   };
-
-        //   document.getElementById("output").innerText = "Loading...";
-
-        //   const apiUrl = "${api_url}";
-
-        //   fetch(apiUrl, {
-        //     method: "POST",
-        //     headers: {
-        //       "Content-Type": "application/json",
-        //     },
-        //     body: JSON.stringify(payload),
-        //   })
-        //     .then((response) => response.json())
-        //     .then((data) => {
-        //       document.getElementById("output").innerText =
-        //         "Upload successful! Response: " + JSON.stringify(data);
-        //     })
-        //     .catch((error) => {
-        //       document.getElementById("output").innerText =
-        //         "Error uploading file: " + error;
-        //     });
-        // };
-
-        // // Read the file as binary string
-        // reader.readAsBinaryString(file);
       }
 
       function redirectToFile() {
