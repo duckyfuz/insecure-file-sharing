@@ -3,6 +3,7 @@ import boto3
 import sys
 import base64
 import os
+import json
 
 
 def hash_file(file_path):
@@ -46,8 +47,8 @@ def upload_to_s3(file_path, bucket_name):
 def lambda_handler(event, context):
     try:
         # Decode the base64 file content
-        file_content = base64.b64decode(event['file_content'])
-        file_name = event['file_name']
+        file_content = base64.b64decode(json.loads(event['body'])['file_content'])
+        file_name = json.loads(event['body'])['file_name']
         bucket_name = event.get('bucket_name', 'ifs-storage-bucket')
 
         # Save the file content to a temporary file
@@ -63,7 +64,7 @@ def lambda_handler(event, context):
 
         return {
             'statusCode': 200,
-            'body': f"File uploaded successfully with key: {file_key_with_extension}"
+            'body': json.dumps({"file_url": f"https://ifs.kenf.dev/{file_key_with_extension}"})
         }
     except Exception as e:
         return {
