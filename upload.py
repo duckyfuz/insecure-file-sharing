@@ -66,30 +66,48 @@ def lambda_handler(event, context):
         return {"statusCode": 403, "body": "Forbidden"}
 
     try:
-        # Decode the base64 file content
-        file_content = base64.b64decode(json.loads(event["body"])["file_content"])
-        file_name = json.loads(event["body"])["file_name"]
         bucket_name = "ifs-storage-bucket"
+        file_name = json.loads(event["body"])["file_name"]
 
-        # Save the file content to a temporary file
-        temp_file_path = f"/tmp/{file_name}"
-        with open(temp_file_path, "wb") as temp_file:
-            temp_file.write(file_content)
-
-        # Upload the temporary file to S3
-        file_key_with_extension = upload_to_s3(temp_file_path, bucket_name)
-
-        # Delete the temporary file after uploading
-        os.remove(temp_file_path)
+        s3_client = boto3.client("s3")
+        presigned_url = s3_client.generate_presigned_url(
+            "put_object",
+            Params={"Bucket": bucket_name, "Key": file_name},
+            ExpiresIn=3600,  # URL expires in 1 hour
+        )
 
         return {
             "statusCode": 200,
-            "body": json.dumps(
-                {"file_url": f"https://ifs.kenf.dev/{file_key_with_extension}"}
-            ),
+            "body": json.dumps({"upload_url": presigned_url}),
         }
     except Exception as e:
-        return {"statusCode": 500, "body": f"Error uploading file: {e}"}
+        return {"statusCode": 500, "body": f"Error generating presigned URL: {e}"}
+
+    # try:
+    #     # Decode the base64 file content
+    #     file_content = base64.b64decode(json.loads(event["body"])["file_content"])
+    #     file_name = json.loads(event["body"])["file_name"]
+    #     bucket_name = "ifs-storage-bucket"
+
+    #     # Save the file content to a temporary file
+    #     temp_file_path = f"/tmp/{file_name}"
+    #     with open(temp_file_path, "wb") as temp_file:
+    #         temp_file.write(file_content)
+
+    #     # Upload the temporary file to S3
+    #     file_key_with_extension = upload_to_s3(temp_file_path, bucket_name)
+
+    #     # Delete the temporary file after uploading
+    #     os.remove(temp_file_path)
+
+    #     return {
+    #         "statusCode": 200,
+    #         "body": json.dumps(
+    #             {"file_url": f"https://ifs.kenf.dev/{file_key_with_extension}"}
+    #         ),
+    #     }
+    # except Exception as e:
+    #     return {"statusCode": 500, "body": f"Error uploading file: {e}"}
 
 
 if __name__ == "__main__":
