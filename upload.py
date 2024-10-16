@@ -5,6 +5,7 @@ import json
 def lambda_handler(event, context):
     origin = event["headers"].get("origin")
 
+    # Prevent programmatic access, TODO: add authentication to lambda
     if origin != "https://ifs.kenf.dev":
         return {"statusCode": 403, "body": "Forbidden"}
 
@@ -21,12 +22,13 @@ def lambda_handler(event, context):
                 "ContentType": "application/octet-stream",
                 "Tagging": "expiration=86400&Content-Disposition=attachment",
             },
-            ExpiresIn=3600,  # URL expires in 1 hour
+            ExpiresIn=1200,  # URL expires in 20 minutes
         )
 
         return {
             "statusCode": 200,
             "body": json.dumps({"upload_url": presigned_url}),
         }
+
     except Exception as e:
         return {"statusCode": 500, "body": f"Error generating presigned URL: {e}"}
