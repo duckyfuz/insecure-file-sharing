@@ -3,8 +3,8 @@ resource "aws_s3_bucket" "main_bucket" {
   force_destroy = true
 }
 
-resource "aws_s3_bucket_cors_configuration" "example" {
-  bucket = aws_s3_bucket.example.id
+resource "aws_s3_bucket_cors_configuration" "allow_ifs_cors" {
+  bucket = aws_s3_bucket.main_bucket.id
 
   cors_rule {
     allowed_headers = ["*"]
