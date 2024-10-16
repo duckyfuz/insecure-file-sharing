@@ -123,7 +123,7 @@
                 return response.json();
               })
               .then((data) => {
-                const presignedUrl = data.presigned_url;
+                const presignedUrl = data.upload_url;
 
                 // Upload the file to the presigned URL
                 return fetch(presignedUrl, {
