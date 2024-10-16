@@ -4,19 +4,72 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>File Upload</title>
+    <style>
+      body {
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+      }
+      .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 50px;
+        padding: 20px;
+      }
+      .box {
+        text-align: center;
+        padding: 20px;
+        border-radius: 8px;
+        width: 300px;
+      }
+      input[type="file"],
+      input[type="text"] {
+        margin-bottom: 10px;
+      }
+      button {
+        padding: 5px 10px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: large;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      #output {
+        margin-top: 20px;
+      }
+    </style>
   </head>
   <body>
-    <h1>Upload PDF to API</h1>
+    <div class="container">
+      <!-- Upload Box -->
+      <div class="box">
+        <!-- File Input -->
+        <input
+          type="file"
+          id="fileInput"
+          style="border: 2px solid #ccc; padding: 5px"
+        />
+        <br />
+        <button onclick="uploadFile()">Upload File</button>
+        <div id="output"></div>
+      </div>
+      <div style="border-left: 1px solid #ccc; height: 96vh"></div>
 
-    <!-- File Input -->
-    <input type="file" id="fileInput" accept=".pdf" />
-    <br /><br />
-
-    <!-- Upload Button -->
-    <button onclick="uploadFile()">Upload File</button>
-
-    <!-- Output -->
-    <div id="output"></div>
+      <div class="box">
+        <input type="text" id="fileNameInput" placeholder="eg. [HASH].type" />
+        <br />
+        <button onclick="redirectToFile()">Go to File</button>
+      </div>
+    </div>
 
     <script>
       function uploadFile() {
@@ -38,6 +91,8 @@
             file_name: file.name,
             file_content: fileContent,
           };
+
+          document.getElementById("output").innerText = "Loading...";
 
           // Send the POST request to your API endpoint
           fetch(
@@ -63,6 +118,16 @@
 
         // Read the file as binary string
         reader.readAsBinaryString(file);
+      }
+
+      function redirectToFile() {
+        const fileName = document.getElementById("fileNameInput").value;
+        if (!fileName) {
+          alert("Please enter a file name.");
+          return;
+        }
+        // Redirect to /input with the file name as query parameter
+        window.location.href = `/${fileName}`;
       }
     </script>
   </body>
