@@ -25,6 +25,11 @@ resource "aws_s3_object" "index_html" {
   key          = "index.html"
   content_type = "text/html"
   source       = "index.html"
+  etag         = filemd5("index.html")
+
+  content = templatefile("index.html", {
+    api_url = aws_lambda_function_url.upload_function_url.function_url
+  })
 }
 
 resource "aws_s3_bucket_policy" "main_bucket_policy" {

@@ -94,17 +94,15 @@
 
           document.getElementById("output").innerText = "Loading...";
 
-          // Send the POST request to your API endpoint
-          fetch(
-            "https://mhn6js3scpmd3ms4h2zu45k3lq0qeedc.lambda-url.ap-southeast-1.on.aws/",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(payload),
-            }
-          )
+          const apiUrl = "${api_url}";
+
+          fetch(apiUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+          })
             .then((response) => response.json())
             .then((data) => {
               document.getElementById("output").innerText =
