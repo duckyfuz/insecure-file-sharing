@@ -19,7 +19,7 @@ resource "aws_lambda_function_url" "upload_function_url" {
 
     cors {
         allow_credentials = true
-        allow_origins     = ["*"]
+        allow_origins     = ["https://ifs.kenf.dev"]
         allow_methods     = ["*"]
         allow_headers     = ["*"]
         expose_headers    = ["*"]
