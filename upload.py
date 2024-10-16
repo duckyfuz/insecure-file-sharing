@@ -45,19 +45,16 @@ def upload_to_s3(file_path, bucket_name):
 
 
 def lambda_handler(event, context):
-    origin = event['headers'].get('origin')
-    
-    if origin != 'https://ifs.kenf.dev':
-        return {
-            'statusCode': 403,
-            'body': 'Forbidden'
-        }
+    origin = event["headers"].get("origin")
+
+    if origin != "https://ifs.kenf.dev":
+        return {"statusCode": 403, "body": "Forbidden"}
 
     try:
         # Decode the base64 file content
-        file_content = base64.b64decode(json.loads(event['body'])['file_content'])
-        file_name = json.loads(event['body'])['file_name']
-        bucket_name = event.get('bucket_name', 'ifs-storage-bucket')
+        file_content = base64.b64decode(json.loads(event["body"])["file_content"])
+        file_name = json.loads(event["body"])["file_name"]
+        bucket_name = event.get("bucket_name", "ifs-storage-bucket")
 
         # Save the file content to a temporary file
         temp_file_path = f"/tmp/{file_name}"
@@ -71,14 +68,14 @@ def lambda_handler(event, context):
         os.remove(temp_file_path)
 
         return {
-            'statusCode': 200,
-            'body': json.dumps({"file_url": f"https://ifs.kenf.dev/{file_key_with_extension}"})
+            "statusCode": 200,
+            "body": json.dumps(
+                {"file_url": f"https://ifs.kenf.dev/{file_key_with_extension}"}
+            ),
         }
     except Exception as e:
-        return {
-            'statusCode': 500,
-            'body': f"Error uploading file: {e}"
-        }
+        return {"statusCode": 500, "body": f"Error uploading file: {e}"}
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2 or len(sys.argv) > 3:
@@ -91,4 +88,3 @@ if __name__ == "__main__":
     file_key_with_extension = upload_to_s3(file_path, bucket_name)
     print(f"File uploaded successfully with key: {file_key_with_extension}")
     print(f"File URL: https://ifs.kenf.dev/{file_key_with_extension}")
-     
