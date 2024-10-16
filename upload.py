@@ -16,15 +16,30 @@ def hash_file(file_path):
 
 
 def upload_to_s3(file_path, bucket_name):
-    """Upload file to S3 with key as first 4 characters of the hash."""
-    file_hash = hash_file(file_path)
-    file_key = file_hash[:4]
+    """Upload file to S3 with key as 4 characters of the hash."""
 
     s3_client = boto3.client("s3")
 
     try:
+        file_hash = hash_file(file_path)
         file_extension = file_path.split(".")[-1]
-        file_key_with_extension = f"{file_key}.{file_extension}"
+
+        s3_client = boto3.client("s3")
+
+        # Check if the file key already exists
+        exists = True
+        index = 0
+        while exists:
+            try:
+                file_key = file_hash[index : index + 4]
+                file_key_with_extension = f"{file_key}.{file_extension}"
+                index += 1
+                s3_client.head_object(Bucket=bucket_name, Key=file_key_with_extension)
+            except s3_client.exceptions.ClientError as e:
+                if e.response["Error"]["Code"] == "404":
+                    exists = False
+                else:
+                    raise e
 
         s3_client.upload_file(file_path, bucket_name, file_key_with_extension)
 
