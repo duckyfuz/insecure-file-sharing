@@ -135,6 +135,9 @@
                 // Upload the file to the presigned URL
                 return fetch(presignedUrl, {
                   method: "PUT",
+                  headers: {
+                    "Content-Type": "application/pdf",
+                  },
                   body: file, // Sending the file directly
                 });
               })

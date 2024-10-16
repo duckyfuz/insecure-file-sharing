@@ -72,7 +72,11 @@ def lambda_handler(event, context):
         s3_client = boto3.client("s3")
         presigned_url = s3_client.generate_presigned_url(
             "put_object",
-            Params={"Bucket": bucket_name, "Key": file_name},
+            Params={
+                "Bucket": bucket_name,
+                "Key": file_name,
+                "ContentType": "application/pdf",
+            },
             ExpiresIn=3600,  # URL expires in 1 hour
         )
 
