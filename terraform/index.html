@@ -136,7 +136,7 @@
                 return fetch(presignedUrl, {
                   method: "PUT",
                   headers: {
-                    "Content-Type": "application/pdf",
+                    "Content-Type": "application/octet-stream",
                   },
                   body: file, // Sending the file directly
                 });

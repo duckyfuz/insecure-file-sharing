@@ -75,7 +75,7 @@ def lambda_handler(event, context):
             Params={
                 "Bucket": bucket_name,
                 "Key": file_name,
-                "ContentType": "application/pdf",
+                "ContentType": "application/octet-stream",
                 "Tagging": "expiration=86400&Content-Disposition=attachment",
             },
             ExpiresIn=3600,  # URL expires in 1 hour
