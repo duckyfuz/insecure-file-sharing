@@ -83,6 +83,13 @@
           return;
         }
 
+        // Check file size (500MB = 500 * 1024 * 1024 bytes)
+        const maxSize = 500 * 1024 * 1024;
+        if (file.size > maxSize) {
+          alert("File size exceeds 500MB limit.");
+          return;
+        }
+
         const reader = new FileReader();
 
         // Define fileContent variable in the appropriate scope
