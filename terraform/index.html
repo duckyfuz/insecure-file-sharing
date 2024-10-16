@@ -109,10 +109,9 @@
           const fileExtension = file.name.split(".").pop();
           sha256(fileContent).then((hash) => {
             const shortHash = hash.slice(0, 4);
-            const newFileName = `${shortHash}.${fileExtension}`;
-            document.getElementById(
-              "output"
-            ).innerText += `\nNew file name: ${newFileName}`;
+            const newFileName = shortHash + "." + fileExtension;
+            document.getElementById("output").innerText +=
+              "New file name: " + newFileName;
           });
         };
 
