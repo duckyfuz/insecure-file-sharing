@@ -69,7 +69,7 @@ def lambda_handler(event, context):
         # Decode the base64 file content
         file_content = base64.b64decode(json.loads(event["body"])["file_content"])
         file_name = json.loads(event["body"])["file_name"]
-        bucket_name = event.get("bucket_name", "ifs-storage-bucket")
+        bucket_name = "ifs-storage-bucket"
 
         # Save the file content to a temporary file
         temp_file_path = f"/tmp/{file_name}"
