@@ -17,20 +17,17 @@ resource "aws_s3_bucket_cors_configuration" "allow_ifs_cors" {
 
 resource "aws_s3_bucket_lifecycle_configuration" "one_day_lifetime" {
   bucket = aws_s3_bucket.main_bucket.id
-
   rule {
     id     = "delete-objects-after-one-day"
     status = "Enabled"
-
     filter {
       tag {
         key   = "expiration"
-        value = "86400"  # Tag value indicating 1 day expiration
+        value = "86400"
       }
     }
-
     expiration {
-      days = 1  # Expire objects after 1 day
+      days = 1
     }
   }
 }
