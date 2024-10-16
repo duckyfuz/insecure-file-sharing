@@ -45,6 +45,14 @@ def upload_to_s3(file_path, bucket_name):
 
 
 def lambda_handler(event, context):
+    origin = event['headers'].get('origin')
+    
+    if origin != 'https://ifs.kenf.dev':
+        return {
+            'statusCode': 403,
+            'body': 'Forbidden'
+        }
+
     try:
         # Decode the base64 file content
         file_content = base64.b64decode(json.loads(event['body'])['file_content'])
