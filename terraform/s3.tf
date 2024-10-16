@@ -15,6 +15,26 @@ resource "aws_s3_bucket_cors_configuration" "allow_ifs_cors" {
   }
 }
 
+resource "aws_s3_bucket_lifecycle_configuration" "one_day_lifetime" {
+  bucket = aws_s3_bucket.main_bucket.id
+
+  rule {
+    id     = "delete-objects-after-one-day"
+    status = "Enabled"
+
+    filter {
+      tag {
+        key   = "expiration"
+        value = "86400"  # Tag value indicating 1 day expiration
+      }
+    }
+
+    expiration {
+      days = 1  # Expire objects after 1 day
+    }
+  }
+}
+
 
 resource "aws_s3_bucket_public_access_block" "allow_public_acl" {
   bucket = aws_s3_bucket.main_bucket.id
