@@ -1,6 +1,8 @@
 import boto3
 import json
 
+s3_client = boto3.client("s3")
+
 
 def lambda_handler(event, context):
     origin = event["headers"].get("origin")
@@ -13,7 +15,6 @@ def lambda_handler(event, context):
         bucket_name = "ifs-storage-bucket"
         file_name = json.loads(event["body"])["file_name"]
 
-        s3_client = boto3.client("s3")
         presigned_url = s3_client.generate_presigned_url(
             "put_object",
             Params={
