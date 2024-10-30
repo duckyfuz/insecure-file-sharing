@@ -22,7 +22,7 @@ def lambda_handler(event, context):
                 "ContentType": "application/octet-stream",
                 "Tagging": "expiration=86400&Content-Disposition=attachment",
             },
-            ExpiresIn=1200,  # URL expires in 20 minutes
+            ExpiresIn=300,  # URL expires in 5mins
         )
 
         return {
