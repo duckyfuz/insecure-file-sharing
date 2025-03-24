@@ -21,6 +21,7 @@ def lambda_handler(event, context):
             {"acl": "public-read"},
             ["content-length-range", 1, 10485760] # allow 10MiB size
         ]
+        # TODO: add filename for downloading
 
         presigned_url = s3_client.generate_presigned_post(
             Bucket=bucket_name,

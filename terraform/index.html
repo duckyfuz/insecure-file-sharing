@@ -117,43 +117,45 @@
             fetch(apiUrl, {
               method: "POST",
               headers: {
-                "Content-Type": "application/json",
+              "Content-Type": "application/json",
               },
               body: JSON.stringify(payload),
-            })
-              .then((response) => {
-                if (!response.ok) {
-                  throw new Error(
-                    "Error fetching presigned URL: " + response.statusText
-                  );
-                }
-                return response.json();
-              })
-              .then((data) => {
-                const presignedUrl = data.upload_url;
+            }).then((response) => {
+              if (!response.ok) {
+                throw new Error(
+                "Error fetching presigned URL: " + response.statusText
+                );
+              }
+              return response.json();
+              }).then((data) => {
+                const presignedUrl = data.upload_url.url;
+                const formData = new FormData();
+
+                // Append all required fields to the form data
+                Object.keys(data.upload_url.fields).forEach((key) => {
+                  formData.append(key, data.upload_url.fields[key]);
+                });
+
+                // Append the file to the form data
+                formData.append("file", file);
 
                 // Upload the file to the presigned URL
                 return fetch(presignedUrl, {
-                  method: "PUT",
-                  headers: {
-                    "Content-Type": "application/octet-stream",
-                  },
-                  body: file, // Sending the file directly
+                  method: "POST",
+                  body: formData,
                 });
-              })
-              .then((uploadResponse) => {
-                if (uploadResponse.ok) {
-                  document.getElementById("output").innerText =
-                    "Upload successful! File name: " + newFileName;
-                } else {
-                  throw new Error(
-                    "Error uploading file to S3: " + uploadResponse.statusText
-                  );
-                }
-              })
-              .catch((error) => {
-                document.getElementById("output").innerText = error.message;
-              });
+                }).then((uploadResponse) => {
+                  if (uploadResponse.ok) {
+                    document.getElementById("output").innerText =
+                      "Upload successful! File name: " + newFileName;
+                  } else {
+                    throw new Error(
+                      "Error uploading file to S3: " + uploadResponse.statusText
+                    );
+                  }
+                }).catch((error) => {
+                  document.getElementById("output").innerText = error.message;
+                });
           });
         };
 
