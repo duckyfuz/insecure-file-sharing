@@ -15,10 +15,10 @@ def lambda_handler(event, context):
         bucket_name = "ifs-storage-bucket"
         file_name = json.loads(event["body"])["file_name"]
 
-        fields = {"acl": "public-read"}
+        # fields = {"acl": "public-read"}
  
         conditions = [
-            {"acl": "public-read"},
+            # {"acl": "public-read"},
             ["content-length-range", 1, 10485760] # allow 10MiB size
         ]
         # TODO: add filename for downloading
@@ -26,7 +26,7 @@ def lambda_handler(event, context):
         presigned_url = s3_client.generate_presigned_post(
             Bucket=bucket_name,
             Key=file_name,
-            Fields=fields,
+            Fields={},
             Conditions=conditions
         )
 
