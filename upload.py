@@ -15,16 +15,30 @@ def lambda_handler(event, context):
         bucket_name = "ifs-storage-bucket"
         file_name = json.loads(event["body"])["file_name"]
 
-        presigned_url = s3_client.generate_presigned_url(
-            "put_object",
-            Params={
-                "Bucket": bucket_name,
-                "Key": file_name,
-                "ContentType": "application/octet-stream",
-                "Tagging": "expiration=86400&Content-Disposition=attachment",
-            },
-            ExpiresIn=300,  # URL expires in 5mins
+        fields = {"acl": "public-read"}
+ 
+        conditions = [
+            {"acl": "public-read"},
+            ["content-length-range", 10, 100]
+        ]
+
+        presigned_url = s3_client.generate_presigned_post(
+            Bucket=bucket_name,
+            Key=file_name,
+            Fields=fields,
+            Conditions=conditions
         )
+
+        # presigned_url = s3_client.generate_presigned_url(
+        #     "put_object",
+        #     Params={
+        #         "Bucket": bucket_name,
+        #         "Key": file_name,
+        #         "ContentType": "application/octet-stream",
+        #         "Tagging": "expiration=86400&Content-Disposition=attachment",
+        #     },
+        #     ExpiresIn=300,  # URL expires in 5mins
+        # )
 
         return {
             "statusCode": 200,
@@ -33,3 +47,13 @@ def lambda_handler(event, context):
 
     except Exception as e:
         return {"statusCode": 500, "body": f"Error generating presigned URL: {e}"}
+
+
+if __name__ == "__main__":
+    test_event = {
+        "headers": {"origin": "https://ifs.kenf.dev"},
+        "body": json.dumps({"file_name": "test.txt"})
+    }
+    test_context = {}
+    response = lambda_handler(test_event, test_context)
+    print(response)
