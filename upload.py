@@ -19,7 +19,7 @@ def lambda_handler(event, context):
  
         conditions = [
             {"acl": "public-read"},
-            ["content-length-range", 10, 100]
+            ["content-length-range", 1, 10485760] # allow 10MiB size
         ]
 
         presigned_url = s3_client.generate_presigned_post(
