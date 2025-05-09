@@ -17,9 +17,10 @@
         --primary-hover: #4338ca;
         --gray-50: #f9fafb;
         --gray-100: #f3f4f6;
-        --gray-200: #e5e7eb;
+        --gray-200: #e5e7eb; /* Used for disabled button background */
         --gray-300: #d1d5db;
-        --gray-700: #374151;
+        --gray-500: #6b7280; /* Can be used for disabled text if --gray-700 is too dark */
+        --gray-700: #374151; /* Used for disabled button text and footer text */
         --gray-800: #1f2937;
         --red-500: #ef4444;
         --green-500: #10b981;
@@ -52,7 +53,7 @@
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
         overflow: hidden;
         margin-top: auto; 
-        margin-bottom: auto;
+        margin-bottom: 1rem; /* Add some margin below container before footer */
       }
       
       .panel {
@@ -108,7 +109,7 @@
         font-size: 1rem;
         font-weight: 500;
         cursor: pointer;
-        transition: background-color 0.2s;
+        transition: background-color 0.2s, color 0.2s;
         width: 100%;
       }
       
@@ -116,14 +117,17 @@
         background-color: var(--primary-hover);
       }
       
-      .button:disabled {
-        background-color: var(--gray-200) !important; /* override hover styles */
-        color: var(--gray-300);
+      .button:disabled,
+      .button[disabled] {
+        background-color: var(--gray-200) !important;
+        color: var(--gray-700) !important;
         cursor: not-allowed;
       }
 
-      .button:disabled:hover {
-        background-color: var(--gray-300);
+      .button:disabled:hover,
+      .button[disabled]:hover {
+        background-color: var(--gray-200) !important; 
+        color: var(--gray-700) !important;
       }
 
       .output {
@@ -136,7 +140,6 @@
         overflow-y: auto;
         white-space: pre-wrap;
         font-size: 0.9rem;
-        /* line-height: 1.5; */
       }
       
       .success {
@@ -173,6 +176,7 @@
         border-top-color: white;
         animation: spin 0.8s linear infinite;
         margin-right: 0.5rem;
+        vertical-align: middle;
       }
       
       @keyframes spin {
@@ -203,6 +207,7 @@
         font-size: 0.9rem;
         color: var(--gray-700);
         margin-top: auto;
+        width: 100%;
       }
 
       footer a {
@@ -233,15 +238,17 @@
       <div class="panel">
         <h2>Access Shared File</h2>
         <input type="text" id="fileNameInput" class="search-input" placeholder="Enter file hash (e.g., a1b2)" />
-        <button onclick="redirectToFile()" class="button">Access File</button>
+        <button id="accessFileButton" onclick="redirectToFile()" class="button" disabled>Access File</button>
       </div>
     </div>
 
     <script>
-      // Set up drag and drop functionality
       const uploadArea = document.getElementById('uploadArea');
       const fileInput = document.getElementById('fileInput');
       const uploadButton = document.getElementById('uploadButton');
+      const outputDiv = document.getElementById('output');
+      const fileNameInput = document.getElementById('fileNameInput');
+      const accessFileButton = document.getElementById('accessFileButton');
       
       uploadArea.addEventListener('click', () => fileInput.click());
       
@@ -277,18 +284,24 @@
       function handleDrop(e) {
         const dt = e.dataTransfer;
         const files = dt.files;
-        fileInput.files = files;
-        checkFile();
+        if (files.length > 0) {
+          fileInput.files = files;
+          checkUploadButtonState();
+        }
       }
       
-      fileInput.addEventListener('change', checkFile);
+      fileInput.addEventListener('change', checkUploadButtonState);
       
-      function checkFile() {
+      function checkUploadButtonState() {
         if (fileInput.files.length > 0) {
           uploadButton.disabled = false;
           uploadArea.innerHTML = `<div class="upload-icon">📄</div><p>${fileInput.files[0].name}</p>`;
         } else {
           uploadButton.disabled = true;
+          uploadArea.innerHTML = `
+            <div class="upload-icon">📤</div>
+            <p>Drag & drop your file here<br>or click to browse</p>
+          `;
         }
       }
       
@@ -302,26 +315,24 @@
 
         if (!file) {
           showError("Please select a file first.");
+          checkUploadButtonState();
           return;
         }
 
-        // Check file size (500MB = 500 * 1024 * 1024 bytes)
-        const maxSize = 500 * 1024 * 1024;
+        const maxSize = 500 * 1024 * 1024; // 500MB
         if (file.size > maxSize) {
           showError("File size exceeds 500MB limit.");
+          checkUploadButtonState();
           return;
         }
 
         const reader = new FileReader();
-        let fileContent;
-
         reader.onload = function (event) {
-          fileContent = event.target.result;
-          // Call sha256 and handle the promise
+          const fileContent = event.target.result;
           sha256(fileContent).then((hash) => {
             const shortHash = hash.slice(0, 4);
-            document.getElementById("output").innerHTML += `🗃️ Processing file: ${file.name}\n`;
-            document.getElementById("output").scrollTop = document.getElementById("output").scrollHeight;
+            outputDiv.innerHTML += `🗃️ Processing file: ${file.name}\n`;
+            outputDiv.scrollTop = outputDiv.scrollHeight;
 
             const payload = {
               file_name: shortHash,
@@ -329,90 +340,94 @@
             };
 
             const apiUrl = "{{api_url}}"; // note: this is replaceed by terraform during deployment
-            // Fetch the presigned URL
             fetch(apiUrl, {
               method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
+              headers: { "Content-Type": "application/json" },
               body: JSON.stringify(payload),
-            }).then((response) => {
+            })
+            .then(response => {
               if (!response.ok) {
-                throw new Error("Error fetching presigned URL: " + response.statusText);
+                return response.text().then(text => { throw new Error(`Error fetching presigned URL (${response.status}): ${text || response.statusText}`); });
               }
               return response.json();
-            }).then((data) => {
+            })
+            .then(data => {
+              if (!data.upload_url || !data.upload_url.url || !data.upload_url.fields) {
+                throw new Error("Invalid presigned URL data received.");
+              }
               const presignedUrl = data.upload_url.url;
               const formData = new FormData();
-
-              // Append all required fields to the form data
-              Object.keys(data.upload_url.fields).forEach((key) => {
+              Object.keys(data.upload_url.fields).forEach(key => {
                 formData.append(key, data.upload_url.fields[key]);
               });
-
-              // Append the file to the form data
               formData.append("file", file);
-
-              // Upload the file to the presigned URL
-              return fetch(presignedUrl, {
-                method: "POST",
-                body: formData,
-              });
-            }).then((uploadResponse) => {
+              return fetch(presignedUrl, { method: "POST", body: formData });
+            })
+            .then(uploadResponse => {
               if (uploadResponse.ok) {
-                uploadButton.innerHTML = 'Upload File';
-                document.getElementById("output").innerHTML += `
-🎉 Upload successful!\n
-You can access your file with the code ${shortHash},\n
-or at <a href="https://ifs.kenf.dev/${shortHash}" target="_blank" rel="noopener noreferrer">https://ifs.kenf.dev/${shortHash}</a>.\n
-`;
-                document.getElementById("output").scrollTop = document.getElementById("output").scrollHeight;
+                outputDiv.innerHTML += `🎉 Upload successful!\n\nAccess with code: <strong class="success">${shortHash}</strong>\nor at <a href="/${shortHash}" target="_blank" rel="noopener noreferrer">https://ifs.kenf.dev/${shortHash}</a>.\n`;
+                outputDiv.scrollTop = outputDiv.scrollHeight;
                 resetUploadArea();
               } else {
-                throw new Error("Error uploading file to S3: " + uploadResponse.statusText);
+                return uploadResponse.text().then(text => { throw new Error(`Error uploading to S3 (${uploadResponse.status}): ${text || uploadResponse.statusText}`); });
               }
-            }).catch((error) => {
-              showError(error.message);
+            })
+            .catch(error => {
+              showError(`Upload failed: ${error.message}`);
             });
+          }).catch(error => {
+             showError(`Hashing failed: ${error.message}`);
           });
         };
-
+        reader.onerror = function() {
+            showError("Error reading file.");
+            resetUploadArea();
+        };
         reader.readAsBinaryString(file);
       }
 
       function showError(message) {
-        uploadButton.disabled = false;
         uploadButton.innerHTML = 'Upload File';
-        document.getElementById("output").innerHTML += `⚠️ ${message}\n`;
-        document.getElementById("output").scrollTop = document.getElementById("output").scrollHeight;
+        checkUploadButtonState(); 
+        outputDiv.innerHTML += `<span class="error">⚠️ ${message}</span>\n`;
+        outputDiv.scrollTop = outputDiv.scrollHeight;
       }
 
       function resetUploadArea() {
-        uploadButton.disabled = true;
-        uploadArea.innerHTML = `
-          <div class="upload-icon">📤</div>
-          <p>Drag & drop your file here<br>or click to browse</p>
-        `;
         fileInput.value = '';
+        checkUploadButtonState();
       }
 
-      function sha256(str) {
-        const buffer = new TextEncoder().encode(str);
-        return crypto.subtle.digest("SHA-256", buffer).then((hash) => {
-          return Array.from(new Uint8Array(hash))
-            .map((x) => ("00" + x.toString(16)).slice(-2))
-            .join("");
-        });
+      function checkAccessButtonState() {
+        if (fileNameInput.value.trim() === '') {
+          accessFileButton.disabled = true;
+        } else {
+          accessFileButton.disabled = false;
+        }
       }
+
+      fileNameInput.addEventListener('input', checkAccessButtonState);
 
       function redirectToFile() {
-        const fileName = document.getElementById("fileNameInput").value.trim();
+        const fileName = fileNameInput.value.trim();
         if (!fileName) {
           alert("Please enter a file hash.");
           return;
         }
         window.location.href = "/" + fileName;
       }
+
+      function sha256(str) {
+        const buffer = new TextEncoder().encode(str);
+        return crypto.subtle.digest("SHA-256", buffer).then(hashBuffer => {
+          const hashArray = Array.from(new Uint8Array(hashBuffer));
+          return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        });
+      }
+
+      checkUploadButtonState();
+      checkAccessButtonState();
+
     </script>
     <footer>
       <p>This was made by an indie developer. Explore some of the other projects at <a href="https://www.kenf.dev" target="_blank" rel="noopener noreferrer">www.kenf.dev</a>.</p>
