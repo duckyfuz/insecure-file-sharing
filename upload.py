@@ -15,11 +15,9 @@ def lambda_handler(event, context):
         bucket_name = "ifs-storage-bucket"
         file_name = json.loads(event["body"])["file_name"]
 
-        # fields = {"acl": "public-read"}
- 
         conditions = [
             # {"acl": "public-read"},
-            ["content-length-range", 1, 10485760] # allow 10MiB size
+            ["content-length-range", 1, 524288000] # allow 500MiB size
         ]
         # TODO: add filename for downloading
 
@@ -29,17 +27,6 @@ def lambda_handler(event, context):
             Fields={},
             Conditions=conditions
         )
-
-        # presigned_url = s3_client.generate_presigned_url(
-        #     "put_object",
-        #     Params={
-        #         "Bucket": bucket_name,
-        #         "Key": file_name,
-        #         "ContentType": "application/octet-stream",
-        #         "Tagging": "expiration=86400&Content-Disposition=attachment",
-        #     },
-        #     ExpiresIn=300,  # URL expires in 5mins
-        # )
 
         return {
             "statusCode": 200,
