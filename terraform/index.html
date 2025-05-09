@@ -321,14 +321,12 @@
 
         if (!file) {
           showError("please select a file first.");
-          checkUploadButtonState();
           return;
         }
 
-        const maxSize = 500 * 1024 * 1024; // 500MB
+        const maxSize = 500 * 1024 * 1024; 
         if (file.size > maxSize) {
           showError("file size exceeds 500MB limit.");
-          checkUploadButtonState();
           return;
         }
 
@@ -375,6 +373,7 @@
               if (uploadResponse.ok) {
                 outputDiv.innerHTML += `🎉 upload successful!\n  access with code: <strong class="success">${shortHash}</strong>\n  or at <a href="/${shortHash}" target="_blank" rel="noopener noreferrer">https://ifs.kenf.dev/${shortHash}</a>\n`;
                 outputDiv.scrollTop = outputDiv.scrollHeight;
+                uploadButton.innerHTML = 'upload file'; 
                 resetUploadArea();
               } else {
                 return uploadResponse.text().then(text => { throw new Error(`Error uploading to S3 (${uploadResponse.status}): ${text || uploadResponse.statusText}`); });
@@ -389,6 +388,7 @@
         };
         reader.onerror = function() {
             showError("Error reading file.");
+            uploadButton.innerHTML = 'upload file';
             resetUploadArea();
         };
         reader.readAsBinaryString(file);
