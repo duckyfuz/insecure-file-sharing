@@ -99,16 +99,15 @@
           fileContent = event.target.result;
           // Call sha256 and handle the promise
           sha256(fileContent).then((hash) => {
-            document.getElementById("output").innerText = "File hash: " + hash;
+            // document.getElementById("output").innerText = "File hash: " + hash;
 
             const shortHash = hash.slice(0, 4);
-            const fileExtension = file.name.split(".").pop();
-            const newFileName = shortHash + "." + fileExtension;
-            document.getElementById("output").innerText +=
-              " New file name: " + newFileName;
+            // const fileExtension = file.name.split(".").pop();
+            // const newFileName = shortHash + "." + fileExtension;
+            document.getElementById("output").innerText = "New file name: " + shortHash + "\n" + "Uploading...";
 
             const payload = {
-              file_name: newFileName,
+              file_name: shortHash,
               original_filename: file.name
             };
 
@@ -147,12 +146,9 @@
                 });
                 }).then((uploadResponse) => {
                   if (uploadResponse.ok) {
-                    document.getElementById("output").innerText =
-                      "Upload successful! File name: " + newFileName;
+                    document.getElementById("output").innerText = "Upload successful!\nFile name: " + shortHash;
                   } else {
-                    throw new Error(
-                      "Error uploading file to S3: " + uploadResponse.statusText
-                    );
+                    throw new Error("Error uploading file to S3: " + uploadResponse.statusText);
                   }
                 }).catch((error) => {
                   document.getElementById("output").innerText = error.message;
