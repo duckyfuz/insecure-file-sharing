@@ -371,7 +371,7 @@
             })
             .then(uploadResponse => {
               if (uploadResponse.ok) {
-                outputDiv.innerHTML += `🎉 upload successful!\n    access with code: <strong class="success">${shortHash}</strong>\n    or at <a href="/${shortHash}" target="_blank" rel="noopener noreferrer">https://ifs.kenf.dev/${shortHash}</a>\n`;
+                outputDiv.innerHTML += `🎉 upload successful!\n     access with code: <strong class="success">${shortHash}</strong>\n     or at <a href="/${shortHash}" target="_blank" rel="noopener noreferrer">https://ifs.kenf.dev/${shortHash}</a>\n`;
                 outputDiv.scrollTop = outputDiv.scrollHeight;
                 uploadButton.innerHTML = 'upload file'; 
                 resetUploadArea();
