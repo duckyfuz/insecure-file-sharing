@@ -112,8 +112,12 @@
         padding: 1rem;
         border-radius: 8px;
         background-color: var(--gray-100);
-        min-height: 100px;
+        height: 6rem;
+        max-height: 6rem;
+        overflow-y: auto;
         white-space: pre-wrap;
+        font-size: 0.9rem;
+        line-height: 1.5;
       }
       
       .success {
@@ -255,7 +259,6 @@
       uploadButton.addEventListener('click', uploadFile);
 
       function uploadFile() {
-        document.getElementById("output").innerText += "🔧 Processing...\n";
         uploadButton.disabled = true;
         uploadButton.innerHTML = '<span class="loading"></span>Uploading...';
 
@@ -282,6 +285,7 @@
           sha256(fileContent).then((hash) => {
             const shortHash = hash.slice(0, 4);
             document.getElementById("output").innerHTML += `Processing file: ${file.name}\n`;
+            document.getElementById("output").scrollTop = document.getElementById("output").scrollHeight;
 
             const payload = {
               file_name: shortHash,
@@ -323,9 +327,10 @@
                 uploadButton.innerHTML = 'Upload File';
                 document.getElementById("output").innerHTML += `
                   🎉 Upload successful!\n
-                  You can access you file with the code ${shortHash},\n
+                  You can access your file with the code ${shortHash},\n
                   or at <a href="https://ifs.kenf.dev/${shortHash}">https://ifs.kenf.dev/${shortHash}</a>.\n
                 `;
+                document.getElementById("output").scrollTop = document.getElementById("output").scrollHeight;
                 resetUploadArea();
               } else {
                 throw new Error("Error uploading file to S3: " + uploadResponse.statusText);
@@ -343,6 +348,7 @@
         uploadButton.disabled = false;
         uploadButton.innerHTML = 'Upload File';
         document.getElementById("output").innerHTML += `⚠️ ${message}\n`;
+        document.getElementById("output").scrollTop = document.getElementById("output").scrollHeight;
       }
 
       function resetUploadArea() {
