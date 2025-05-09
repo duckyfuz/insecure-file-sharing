@@ -123,7 +123,7 @@
         overflow-y: auto;
         white-space: pre-wrap;
         font-size: 0.9rem;
-        /* line-height: 1.5; */
+        line-height: 1.5;
       }
       
       .success {
@@ -334,8 +334,7 @@
                 document.getElementById("output").innerHTML += `
 🎉 Upload successful!\n
 You can access your file with the code ${shortHash},\n
-or at <a href="https://ifs.kenf.dev/${shortHash}">https://ifs.kenf.dev/${shortHash}</a>.\n
-                `;
+or at <a href="https://ifs.kenf.dev/${shortHash}">https://ifs.kenf.dev/${shortHash}</a>.\n`;
                 document.getElementById("output").scrollTop = document.getElementById("output").scrollHeight;
                 resetUploadArea();
               } else {
