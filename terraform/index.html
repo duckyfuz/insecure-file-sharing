@@ -315,19 +315,19 @@
 
       function uploadFile() {
         uploadButton.disabled = true;
-        uploadButton.innerHTML = '<span class="loading"></span>Uploading...';
+        uploadButton.innerHTML = '<span class="loading"></span>uploading...';
 
         const file = fileInput.files[0];
 
         if (!file) {
-          showError("Please select a file first.");
+          showError("please select a file first.");
           checkUploadButtonState();
           return;
         }
 
         const maxSize = 500 * 1024 * 1024; // 500MB
         if (file.size > maxSize) {
-          showError("File size exceeds 500MB limit.");
+          showError("file size exceeds 500MB limit.");
           checkUploadButtonState();
           return;
         }
@@ -337,7 +337,7 @@
           const fileContent = event.target.result;
           sha256(fileContent).then((hash) => {
             const shortHash = hash.slice(0, 4);
-            outputDiv.innerHTML += `🗃️ Processing file: ${file.name}\n`;
+            outputDiv.innerHTML += `🗃️ processing file: ${file.name}\n`;
             outputDiv.scrollTop = outputDiv.scrollHeight;
 
             const payload = {
@@ -353,7 +353,9 @@
             })
             .then(response => {
               if (!response.ok) {
-                return response.text().then(text => { throw new Error(`Error fetching presigned URL (${response.status}): ${text || response.statusText}`); });
+                return response.text().then(text => { 
+                  throw new Error(`Error fetching presigned URL (${response.status}): ${text || response.statusText}`); 
+                });
               }
               return response.json();
             })
@@ -371,7 +373,7 @@
             })
             .then(uploadResponse => {
               if (uploadResponse.ok) {
-                outputDiv.innerHTML += `🎉 Upload successful!\n\nAccess with code: <strong class="success">${shortHash}</strong>\nor at <a href="/${shortHash}" target="_blank" rel="noopener noreferrer">https://ifs.kenf.dev/${shortHash}</a>.\n`;
+                outputDiv.innerHTML += `🎉 upload successful!\naccess with code: <strong class="success">${shortHash}</strong>\nor at <a href="/${shortHash}" target="_blank" rel="noopener noreferrer">https://ifs.kenf.dev/${shortHash}</a>.\n`;
                 outputDiv.scrollTop = outputDiv.scrollHeight;
                 resetUploadArea();
               } else {
@@ -379,10 +381,10 @@
               }
             })
             .catch(error => {
-              showError(`Upload failed: ${error.message}`);
+              showError(`upload failed: ${error.message}`);
             });
           }).catch(error => {
-             showError(`Hashing failed: ${error.message}`);
+             showError(`hashing failed: ${error.message}`);
           });
         };
         reader.onerror = function() {
@@ -436,7 +438,7 @@
 
     </script>
     <footer>
-      <p>This was made by an indie developer. Explore some of the other projects at <a href="https://www.kenf.dev" target="_blank" rel="noopener noreferrer">www.kenf.dev</a>.</p>
+      <p>this was made by an indie developer. explore some other projects at <a href="https://www.kenf.dev" target="_blank" rel="noopener noreferrer">www.kenf.dev</a>.</p>
     </footer>
   </body>
 </html>
