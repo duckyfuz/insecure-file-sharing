@@ -223,22 +223,22 @@
   <body>
     <div class="container">
       <div class="panel">
-        <h2>Upload File</h2>
+        <h2>upload file</h2>
         <div class="upload-area" id="uploadArea">
           <div class="upload-icon">📤</div>
-          <p>Drag & drop your file here<br>or click to browse</p>
+          <p>drag & drop your file here<br>or click to browse</p>
           <input type="file" id="fileInput" class="file-input" />
         </div>
-        <button id="uploadButton" class="button" disabled>Upload File</button>
+        <button id="uploadButton" class="button" disabled>upload file</button>
         <div id="output" class="output"></div>
       </div>
       
       <div class="divider"></div>
       
       <div class="panel">
-        <h2>Access Shared File</h2>
-        <input type="text" id="fileNameInput" class="search-input" placeholder="Enter file hash (e.g., a1b2)" />
-        <button id="accessFileButton" onclick="redirectToFile()" class="button" disabled>Access File</button>
+        <h2>access shared file</h2>
+        <input type="text" id="fileNameInput" class="search-input" placeholder="enter file hash (e.g., a1b2)" />
+        <button id="accessFileButton" onclick="redirectToFile()" class="button" disabled>access file</button>
       </div>
     </div>
 
@@ -300,7 +300,7 @@
           uploadButton.disabled = true;
           uploadArea.innerHTML = `
             <div class="upload-icon">📤</div>
-            <p>Drag & drop your file here<br>or click to browse</p>
+            <p>drag & drop your file here<br>or click to browse</p>
           `;
         }
       }
@@ -387,7 +387,7 @@
       }
 
       function showError(message) {
-        uploadButton.innerHTML = 'Upload File';
+        uploadButton.innerHTML = 'upload file';
         checkUploadButtonState(); 
         outputDiv.innerHTML += `<span class="error">⚠️ ${message}</span>\n`;
         outputDiv.scrollTop = outputDiv.scrollHeight;
