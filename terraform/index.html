@@ -3,115 +3,292 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>File Upload</title>
+    <title>SecureShare</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
     <style>
-      body {
+      :root {
+        --primary: #4f46e5;
+        --primary-hover: #4338ca;
+        --gray-50: #f9fafb;
+        --gray-100: #f3f4f6;
+        --gray-200: #e5e7eb;
+        --gray-300: #d1d5db;
+        --gray-700: #374151;
+        --gray-800: #1f2937;
+        --red-500: #ef4444;
+        --green-500: #10b981;
+      }
+      
+      * {
+        box-sizing: border-box;
         margin: 0;
+        padding: 0;
+      }
+      
+      body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        background: linear-gradient(135deg, #f5f7fa 0%, #eef1f5 100%);
+        color: var(--gray-800);
         height: 100vh;
         display: flex;
         justify-content: center;
         align-items: center;
-        font-family: Arial, sans-serif;
-        background-color: #f4f4f4;
+        line-height: 1.5;
       }
+      
       .container {
         display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 50px;
-        padding: 20px;
+        max-width: 900px;
+        width: 90%;
+        background-color: white;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
       }
-      .box {
-        text-align: center;
-        padding: 20px;
+      
+      .panel {
+        flex: 1;
+        padding: 2.5rem;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .divider {
+        width: 1px;
+        background-color: var(--gray-200);
+      }
+      
+      h2 {
+        font-weight: 600;
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+        color: var(--gray-800);
+      }
+      
+      .upload-area {
+        border: 2px dashed var(--gray-300);
         border-radius: 8px;
-        width: 300px;
+        padding: 2rem;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        transition: all 0.2s;
+        cursor: pointer;
       }
-      input[type="file"],
-      input[type="text"] {
-        margin-bottom: 10px;
+      
+      .upload-area:hover {
+        border-color: var(--primary);
+        background-color: var(--gray-50);
       }
-      button {
-        padding: 5px 10px;
-        background-color: #4caf50;
+      
+      .upload-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        color: var(--gray-700);
+      }
+      
+      .file-input {
+        display: none;
+      }
+      
+      .button {
+        background-color: var(--primary);
         color: white;
         border: none;
-        border-radius: 4px;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 500;
         cursor: pointer;
-        font-size: large;
+        transition: background-color 0.2s;
+        width: 100%;
       }
-      button:hover {
-        background-color: #45a049;
+      
+      .button:hover {
+        background-color: var(--primary-hover);
       }
-      #output {
-        margin-top: 20px;
+      
+      .output {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        border-radius: 8px;
+        background-color: var(--gray-100);
+        min-height: 100px;
+        white-space: pre-wrap;
+      }
+      
+      .success {
+        color: var(--green-500);
+        font-weight: 500;
+      }
+      
+      .error {
+        color: var(--red-500);
+      }
+      
+      .search-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--gray-300);
+        border-radius: 8px;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        transition: border-color 0.2s;
+      }
+      
+      .search-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      }
+      
+      .loading {
+        display: inline-block;
+        width: 1rem;
+        height: 1rem;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 0.8s linear infinite;
+        margin-right: 0.5rem;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      
+      @media (max-width: 768px) {
+        .container {
+          flex-direction: column;
+          width: 95%;
+        }
+        
+        .panel {
+          padding: 1.5rem;
+        }
+        
+        .divider {
+          width: 100%;
+          height: 1px;
+        }
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <!-- Upload Box -->
-      <div class="box">
-        <!-- File Input -->
-        <input
-          type="file"
-          id="fileInput"
-          style="border: 2px solid #ccc; padding: 5px"
-        />
-        <br />
-        <button onclick="uploadFile()">Upload File</button>
-        <div id="output"></div>
+      <!-- Upload Panel -->
+      <div class="panel">
+        <h2>Upload File</h2>
+        <div class="upload-area" id="uploadArea">
+          <div class="upload-icon">📤</div>
+          <p>Drag & drop your file here<br>or click to browse</p>
+          <input type="file" id="fileInput" class="file-input" />
+        </div>
+        <button id="uploadButton" class="button" disabled>Upload File</button>
+        <div id="output" class="output"></div>
       </div>
-      <div style="border-left: 1px solid #ccc; height: 96vh"></div>
-
-      <div class="box">
-        <input type="text" id="fileNameInput" placeholder="eg. [HASH].type" />
-        <br />
-        <button onclick="redirectToFile()">Go to File</button>
+      
+      <div class="divider"></div>
+      
+      <!-- Access Panel -->
+      <div class="panel">
+        <h2>Access Shared File</h2>
+        <input type="text" id="fileNameInput" class="search-input" placeholder="Enter file hash (e.g., a1b2)" />
+        <button onclick="redirectToFile()" class="button">Access File</button>
       </div>
     </div>
 
     <script>
-      function uploadFile() {
-        document.getElementById("output").innerText = "Loading...";
+      // Set up drag and drop functionality
+      const uploadArea = document.getElementById('uploadArea');
+      const fileInput = document.getElementById('fileInput');
+      const uploadButton = document.getElementById('uploadButton');
+      
+      uploadArea.addEventListener('click', () => fileInput.click());
+      
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, preventDefaults, false);
+      });
+      
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      
+      ['dragenter', 'dragover'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, highlight, false);
+      });
+      
+      ['dragleave', 'drop'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, unhighlight, false);
+      });
+      
+      function highlight() {
+        uploadArea.style.borderColor = getComputedStyle(document.documentElement).getPropertyValue('--primary');
+        uploadArea.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--gray-50');
+      }
+      
+      function unhighlight() {
+        uploadArea.style.borderColor = '';
+        uploadArea.style.backgroundColor = '';
+      }
+      
+      uploadArea.addEventListener('drop', handleDrop, false);
+      
+      function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        fileInput.files = files;
+        checkFile();
+      }
+      
+      fileInput.addEventListener('change', checkFile);
+      
+      function checkFile() {
+        if (fileInput.files.length > 0) {
+          uploadButton.disabled = false;
+          uploadArea.innerHTML = `<div class="upload-icon">📄</div><p>${fileInput.files[0].name}</p>`;
+        } else {
+          uploadButton.disabled = true;
+        }
+      }
+      
+      uploadButton.addEventListener('click', uploadFile);
 
-        const fileInput = document.getElementById("fileInput");
+      function uploadFile() {
+        document.getElementById("output").innerText = "Processing...";
+        uploadButton.disabled = true;
+        uploadButton.innerHTML = '<span class="loading"></span>Uploading...';
+
         const file = fileInput.files[0];
 
         if (!file) {
-          alert("Please select a file first.");
+          showError("Please select a file first.");
           return;
         }
 
         // Check file size (500MB = 500 * 1024 * 1024 bytes)
         const maxSize = 500 * 1024 * 1024;
         if (file.size > maxSize) {
-          alert("File size exceeds 500MB limit.");
+          showError("File size exceeds 500MB limit.");
           return;
         }
 
         const reader = new FileReader();
-
-        // Define fileContent variable in the appropriate scope
         let fileContent;
 
         reader.onload = function (event) {
           fileContent = event.target.result;
           // Call sha256 and handle the promise
           sha256(fileContent).then((hash) => {
-            // document.getElementById("output").innerText = "File hash: " + hash;
-
             const shortHash = hash.slice(0, 4);
-            // const fileExtension = file.name.split(".").pop();
-            // const newFileName = shortHash + "." + fileExtension;
-            document.getElementById("output").innerText = "New file name: " + shortHash + "\n" + "Uploading...";
+            document.getElementById("output").innerHTML = `<p>Processing file: <strong>${shortHash}</strong></p>`;
 
             const payload = {
               file_name: shortHash,
               original_filename: file.name
             };
 
-            const apiUrl = "${api_url}"; // Replace with your actual API URL
+            const apiUrl = "${api_url}";
 
             // Fetch the presigned URL
             fetch(apiUrl, {
@@ -122,59 +299,77 @@
               body: JSON.stringify(payload),
             }).then((response) => {
               if (!response.ok) {
-                throw new Error(
-                "Error fetching presigned URL: " + response.statusText
-                );
+                throw new Error("Error fetching presigned URL: " + response.statusText);
               }
               return response.json();
-              }).then((data) => {
-                const presignedUrl = data.upload_url.url;
-                const formData = new FormData();
+            }).then((data) => {
+              const presignedUrl = data.upload_url.url;
+              const formData = new FormData();
 
-                // Append all required fields to the form data
-                Object.keys(data.upload_url.fields).forEach((key) => {
-                  formData.append(key, data.upload_url.fields[key]);
-                });
+              // Append all required fields to the form data
+              Object.keys(data.upload_url.fields).forEach((key) => {
+                formData.append(key, data.upload_url.fields[key]);
+              });
 
-                // Append the file to the form data
-                formData.append("file", file);
+              // Append the file to the form data
+              formData.append("file", file);
 
-                // Upload the file to the presigned URL
-                return fetch(presignedUrl, {
-                  method: "POST",
-                  body: formData,
-                });
-                }).then((uploadResponse) => {
-                  if (uploadResponse.ok) {
-                    document.getElementById("output").innerText = "Upload successful!\nFile name: " + shortHash;
-                  } else {
-                    throw new Error("Error uploading file to S3: " + uploadResponse.statusText);
-                  }
-                }).catch((error) => {
-                  document.getElementById("output").innerText = error.message;
-                });
+              // Upload the file to the presigned URL
+              return fetch(presignedUrl, {
+                method: "POST",
+                body: formData,
+              });
+            }).then((uploadResponse) => {
+              if (uploadResponse.ok) {
+                uploadButton.innerHTML = 'Upload File';
+                document.getElementById("output").innerHTML = `
+                  <p class="success">✓ Upload successful!</p>
+                  <p>File hash: <strong>${shortHash}</strong></p>
+                  <p>Share this hash with others to give them access to your file.</p>
+                `;
+                resetUploadArea();
+              } else {
+                throw new Error("Error uploading file to S3: " + uploadResponse.statusText);
+              }
+            }).catch((error) => {
+              showError(error.message);
+            });
           });
         };
 
-        reader.readAsBinaryString(file); // Initiate reading the file
+        reader.readAsBinaryString(file);
+      }
 
-        function sha256(str) {
-          const buffer = new TextEncoder().encode(str);
-          return crypto.subtle.digest("SHA-256", buffer).then((hash) => {
-            return Array.from(new Uint8Array(hash))
-              .map((x) => ("00" + x.toString(16)).slice(-2))
-              .join("");
-          });
-        }
+      function showError(message) {
+        uploadButton.disabled = false;
+        uploadButton.innerHTML = 'Upload File';
+        document.getElementById("output").innerHTML = `<p class="error">⚠️ ${message}</p>`;
+      }
+
+      function resetUploadArea() {
+        uploadButton.disabled = true;
+        uploadArea.innerHTML = `
+          <div class="upload-icon">📤</div>
+          <p>Drag & drop your file here<br>or click to browse</p>
+        `;
+        fileInput.value = '';
+      }
+
+      function sha256(str) {
+        const buffer = new TextEncoder().encode(str);
+        return crypto.subtle.digest("SHA-256", buffer).then((hash) => {
+          return Array.from(new Uint8Array(hash))
+            .map((x) => ("00" + x.toString(16)).slice(-2))
+            .join("");
+        });
       }
 
       function redirectToFile() {
-        const fileName = document.getElementById("fileNameInput").value;
+        const fileName = document.getElementById("fileNameInput").value.trim();
         if (!fileName) {
-          alert("Please enter a file name.");
+          alert("Please enter a file hash.");
           return;
         }
-        // Redirect to /input with the file name as query parameter
         window.location.href = "/" + fileName;
       }
     </script>
