@@ -35,8 +35,9 @@
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         background: linear-gradient(135deg, #f5f7fa 0%, #eef1f5 100%);
         color: var(--gray-800);
-        height: 100vh;
+        min-height: 100vh;
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
         line-height: 1.5;
@@ -50,6 +51,8 @@
         border-radius: 16px;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
         overflow: hidden;
+        margin-top: auto; 
+        margin-bottom: auto;
       }
       
       .panel {
@@ -123,7 +126,7 @@
         overflow-y: auto;
         white-space: pre-wrap;
         font-size: 0.9rem;
-        line-height: 1.5;
+        /* line-height: 1.5; */
       }
       
       .success {
@@ -170,6 +173,8 @@
         .container {
           flex-direction: column;
           width: 95%;
+          margin-top: 1rem;
+          margin-bottom: 1rem;
         }
         
         .panel {
@@ -181,11 +186,27 @@
           height: 1px;
         }
       }
+
+      footer {
+        text-align: center;
+        padding: 1.5rem;
+        font-size: 0.9rem;
+        color: var(--gray-700);
+        margin-top: auto;
+      }
+
+      footer a {
+        color: var(--primary);
+        text-decoration: none;
+      }
+
+      footer a:hover {
+        text-decoration: underline;
+      }
     </style>
   </head>
   <body>
     <div class="container">
-      <!-- Upload Panel -->
       <div class="panel">
         <h2>Upload File</h2>
         <div class="upload-area" id="uploadArea">
@@ -199,7 +220,6 @@
       
       <div class="divider"></div>
       
-      <!-- Access Panel -->
       <div class="panel">
         <h2>Access Shared File</h2>
         <input type="text" id="fileNameInput" class="search-input" placeholder="Enter file hash (e.g., a1b2)" />
@@ -298,7 +318,7 @@
               original_filename: file.name
             };
 
-            const apiUrl = "{{api_url}}";
+            const apiUrl = "{{api_url}}"; // note: this is replaceed by terraform during deployment
             // Fetch the presigned URL
             fetch(apiUrl, {
               method: "POST",
@@ -334,7 +354,8 @@
                 document.getElementById("output").innerHTML += `
 🎉 Upload successful!\n
 You can access your file with the code ${shortHash},\n
-or at <a href="https://ifs.kenf.dev/${shortHash}">https://ifs.kenf.dev/${shortHash}</a>.\n`;
+or at <a href="https://ifs.kenf.dev/${shortHash}" target="_blank" rel="noopener noreferrer">https://ifs.kenf.dev/${shortHash}</a>.\n
+`;
                 document.getElementById("output").scrollTop = document.getElementById("output").scrollHeight;
                 resetUploadArea();
               } else {
@@ -383,5 +404,8 @@ or at <a href="https://ifs.kenf.dev/${shortHash}">https://ifs.kenf.dev/${shortHa
         window.location.href = "/" + fileName;
       }
     </script>
+    <footer>
+      <p>This was made by an indie developer. Explore some of the other projects at <a href="https://www.kenf.dev" target="_blank" rel="noopener noreferrer">www.kenf.dev</a>.</p>
+    </footer>
   </body>
 </html>
