@@ -288,8 +288,7 @@
               original_filename: file.name
             };
 
-            const apiUrl = "${api_url}";
-
+            const apiUrl = "{{api_url}}";
             // Fetch the presigned URL
             fetch(apiUrl, {
               method: "POST",

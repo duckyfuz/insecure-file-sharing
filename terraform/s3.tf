@@ -1,3 +1,8 @@
+locals {
+  template_content = file("index.html")
+  processed_content = replace(local.template_content, "{{api_url}}", aws_lambda_function_url.upload_function_url.function_url)
+}
+
 resource "aws_s3_bucket" "main_bucket" {
   bucket        = "ifs-storage-bucket"
   force_destroy = true
@@ -56,9 +61,7 @@ resource "aws_s3_object" "index_html" {
   content_type = "text/html"
   etag         = filemd5("index.html")
 
-  content = templatefile("index.html", {
-    api_url = aws_lambda_function_url.upload_function_url.function_url
-  })
+  content = local.processed_content
 }
 
 resource "aws_s3_bucket_policy" "main_bucket_policy" {
