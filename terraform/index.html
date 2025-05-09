@@ -255,7 +255,7 @@
       uploadButton.addEventListener('click', uploadFile);
 
       function uploadFile() {
-        document.getElementById("output").innerText = "Processing...";
+        document.getElementById("output").innerText += "🔧 Processing...\n";
         uploadButton.disabled = true;
         uploadButton.innerHTML = '<span class="loading"></span>Uploading...';
 
@@ -281,7 +281,7 @@
           // Call sha256 and handle the promise
           sha256(fileContent).then((hash) => {
             const shortHash = hash.slice(0, 4);
-            document.getElementById("output").innerHTML = `<p>Processing file: <strong>${shortHash}</strong></p>`;
+            document.getElementById("output").innerHTML += `Processing file: ${file.name}\n`;
 
             const payload = {
               file_name: shortHash,
@@ -321,10 +321,10 @@
             }).then((uploadResponse) => {
               if (uploadResponse.ok) {
                 uploadButton.innerHTML = 'Upload File';
-                document.getElementById("output").innerHTML = `
-                  <p class="success">✓ Upload successful!</p>
-                  <p>File hash: <strong>${shortHash}</strong></p>
-                  <p>Share this hash with others to give them access to your file.</p>
+                document.getElementById("output").innerHTML += `
+                  🎉 Upload successful!\n
+                  You can access you file with the code ${shortHash},\n
+                  or at <a href="https://ifs.kenf.dev/${shortHash}">https://ifs.kenf.dev/${shortHash}</a>.\n
                 `;
                 resetUploadArea();
               } else {
@@ -342,7 +342,7 @@
       function showError(message) {
         uploadButton.disabled = false;
         uploadButton.innerHTML = 'Upload File';
-        document.getElementById("output").innerHTML = `<p class="error">⚠️ ${message}</p>`;
+        document.getElementById("output").innerHTML += `⚠️ ${message}\n`;
       }
 
       function resetUploadArea() {
