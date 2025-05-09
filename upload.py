@@ -43,7 +43,10 @@ def lambda_handler(event, context):
 if __name__ == "__main__":
     test_event = {
         "headers": {"origin": "https://ifs.kenf.dev"},
-        "body": json.dumps({"file_name": "test.txt"})
+        "body": json.dumps({
+            "file_name": "1234.txt",
+            "original_filename": "test.txt"
+        })
     }
     test_context = {}
     response = lambda_handler(test_event, test_context)
