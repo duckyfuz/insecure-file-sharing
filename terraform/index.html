@@ -246,7 +246,7 @@
       function checkFile() {
         if (fileInput.files.length > 0) {
           uploadButton.disabled = false;
-          uploadArea.innerHTML = `<div class="upload-icon">📄</div><p>${fileInput.files[0].name}</p>`;
+          uploadArea.innerHTML = "<div class=\"upload-icon\">📄</div><p>" + fileInput.files[0].name + "</p>";
         } else {
           uploadButton.disabled = true;
         }
