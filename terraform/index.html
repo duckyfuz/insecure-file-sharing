@@ -343,7 +343,7 @@
               original_filename: file.name
             };
 
-            const apiUrl = "{{api_url}}"; // note: this is replaceed by terraform during deployment
+            const apiUrl = "{{api_url}}"; // note: this is replaced by terraform during deployment
             fetch(apiUrl, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -363,10 +363,12 @@
               }
               const presignedUrl = data.upload_url.url;
               const formData = new FormData();
+              console.log(data.upload_url.fields)
               Object.keys(data.upload_url.fields).forEach(key => {
                 formData.append(key, data.upload_url.fields[key]);
               });
               formData.append("file", file);
+              console.log(formData);
               return fetch(presignedUrl, { method: "POST", body: formData });
             })
             .then(uploadResponse => {
