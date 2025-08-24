@@ -18,13 +18,9 @@ def lambda_handler(event, context):
         file_name = body_data["file_name"]
         original_filename = body_data["original_filename"]
 
-        # expire_seconds = 86400  # 1 day in seconds
-        # expire_tag = f"expiration={expire_seconds}"
-
         conditions = [
             ["content-length-range", 1, 524288000],  # allow up to 500MiB size
             ["eq", "$Content-Disposition", f"attachment; filename=\"{original_filename}\""],
-            # {"x-amz-tagging": expire_tag}
             {'tagging': '<Tagging><TagSet><Tag><Key>expiration</Key><Value>86400</Value></Tag></TagSet></Tagging>',}
         ]
 
@@ -33,7 +29,6 @@ def lambda_handler(event, context):
             Key=file_name,
             Fields={
                 "Content-Disposition": f"attachment; filename=\"{original_filename}\"",
-                # "x-amz-tagging": expire_tag
                 'tagging': '<Tagging><TagSet><Tag><Key>expiration</Key><Value>86400</Value></Tag></TagSet></Tagging>'
             },
             Conditions=conditions
