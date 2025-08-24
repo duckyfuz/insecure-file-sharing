@@ -1,6 +1,5 @@
 import boto3
 import json
-import urllib.parse
 
 s3_client = boto3.client("s3")
 
@@ -14,24 +13,26 @@ def lambda_handler(event, context):
 
     try:
         bucket_name = "ifs-storage-bucket"
-        file_name = json.loads(event["body"])["file_name"]
-        original_filename = json.loads(event["body"])["original_filename"]
         
-        tags = urllib.parse.urlencode({"expiration": "86400"})
+        body_data = json.loads(event["body"])
+        file_name = body_data["file_name"]
+        original_filename = body_data["original_filename"]
+
+        expire_seconds = 86400  # 1 day in seconds
+        expire_tag = f"expiration={expire_seconds}"
 
         conditions = [
-            # {"acl": "public-read"},
-            ["content-length-range", 1, 524288000], # allow 500MiB size
+            ["content-length-range", 1, 524288000],  # allow up to 500MiB size
             ["eq", "$Content-Disposition", f"attachment; filename=\"{original_filename}\""],
-            ["eq", "$x-amz-tagging", tags]          # Condition to match the tagging
+            {"x-amz-tagging": expire_tag}
         ]
 
         presigned_url = s3_client.generate_presigned_post(
             Bucket=bucket_name,
             Key=file_name,
             Fields={
-               "Content-Disposition": f"attachment; filename=\"{original_filename}\"",
-                "x-amz-tagging": tags
+                "Content-Disposition": f"attachment; filename=\"{original_filename}\"",
+                "x-amz-tagging": expire_tag
             },
             Conditions=conditions
         )
