@@ -1,5 +1,6 @@
 import boto3
 import json
+import urllib.parse
 
 s3_client = boto3.client("s3")
 
@@ -15,6 +16,8 @@ def lambda_handler(event, context):
         bucket_name = "ifs-storage-bucket"
         file_name = json.loads(event["body"])["file_name"]
         original_filename = json.loads(event["body"])["original_filename"]
+        
+        tags = urllib.parse.urlencode({"expiration": "86400"})
 
         conditions = [
             # {"acl": "public-read"},
@@ -26,7 +29,8 @@ def lambda_handler(event, context):
             Bucket=bucket_name,
             Key=file_name,
             Fields={
-               "Content-Disposition": f"attachment; filename=\"{original_filename}\""
+               "Content-Disposition": f"attachment; filename=\"{original_filename}\"",
+                "x-amz-tagging": tags
             },
             Conditions=conditions
         )
