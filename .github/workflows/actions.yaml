@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+permissions:
+  issues: write
+
 jobs:
   terraform:
     runs-on: ubuntu-latest
@@ -36,6 +39,17 @@ jobs:
         run: terraform plan -out=tfplan
         working-directory: ./terraform
 
+      - name: Wait for manual approval
+        uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ secrets.GITHUB_TOKEN }}
+          approvers: duckyfuz
+          minimum-approvals: 1
+          issue-title: "Approve Terraform apply"
+          issue-body: "Please approve or deny the Terraform apply for this push to main. Reply with 'approve' or 'deny'."
+          exclude-workflow-initiator-as-approver: true
+          fail-on-denial: true
+
       - name: Apply Terraform changes
         run: terraform apply --auto-approve tfplan
         working-directory: ./terraform
@@ -49,13 +63,11 @@ jobs:
     environment: aws
     needs: terraform
     if: github.ref == 'refs/heads/main'
+
     steps:
-      - name: Wait for approval
-        uses: peter-evans/workflow-dispatch@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Checkout repository
         uses: actions/checkout@v2
+
       - name: Set AWS credentials
         run: |
           echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
@@ -64,13 +76,27 @@ jobs:
           export AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
           export AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
           export CLOUDFLARE_API_TOKEN=${{ secrets.CLOUDFLARE_API_TOKEN }}
+
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
         with:
           terraform_version: 1.9.0
+
       - name: Initialize Terraform
         run: terraform init
         working-directory: ./terraform
+
+      - name: Wait for manual approval
+        uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ secrets.GITHUB_TOKEN }}
+          approvers: duckyfuz
+          minimum-approvals: 1
+          issue-title: "Approve Terraform apply"
+          issue-body: "Please approve or deny the Terraform destroy for this push to main. Reply with 'approve' or 'deny'."
+          exclude-workflow-initiator-as-approver: true
+          fail-on-denial: true
+
       - name: Destroy Terraform infrastructure
         run: terraform destroy --auto-approve
         working-directory: ./terraform
