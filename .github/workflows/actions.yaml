@@ -92,7 +92,7 @@ jobs:
           secret: ${{ secrets.GITHUB_TOKEN }}
           approvers: duckyfuz
           minimum-approvals: 1
-          issue-title: "Approve Terraform apply"
+          issue-title: "Approve Terraform destroy"
           issue-body: "Please approve or deny the Terraform destroy for this push to main. Reply with 'approve' or 'deny'."
           exclude-workflow-initiator-as-approver: false
           fail-on-denial: true
