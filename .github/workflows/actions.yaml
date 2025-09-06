@@ -47,7 +47,7 @@ jobs:
           minimum-approvals: 1
           issue-title: "Approve Terraform apply"
           issue-body: "Please approve or deny the Terraform apply for this push to main. Reply with 'approve' or 'deny'."
-          exclude-workflow-initiator-as-approver: true
+          exclude-workflow-initiator-as-approver: false
           fail-on-denial: true
 
       - name: Apply Terraform changes
@@ -94,7 +94,7 @@ jobs:
           minimum-approvals: 1
           issue-title: "Approve Terraform apply"
           issue-body: "Please approve or deny the Terraform destroy for this push to main. Reply with 'approve' or 'deny'."
-          exclude-workflow-initiator-as-approver: true
+          exclude-workflow-initiator-as-approver: false
           fail-on-denial: true
 
       - name: Destroy Terraform infrastructure
