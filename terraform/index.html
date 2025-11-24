@@ -356,7 +356,7 @@
 
       function uploadFile() {
         uploadButton.disabled = true;
-        uploadButton.innerHTML = '<span class="loading"></span>uploading...';
+        uploadButton.innerHTML = `<span class="loading"></span>uploading...`;
 
         const file = fileInput.files[0];
 
@@ -449,7 +449,7 @@
               }
             })
             .catch((error) => {
-              showError(`upload failed: ${error.message}`);
+              showError(`upload failed: $${error.message}`);
             });
         };
         reader.onerror = function () {
@@ -517,8 +517,12 @@
     <footer>
       <p>
         this was made by an indie developer. explore some other projects at
-        <a href="https://www.kenf.dev" target="_blank" rel="noopener noreferrer"
-          >www.kenf.dev</a
+        <a
+          href="https://www.kenf.dev"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          www.kenf.dev </a
         >.
       </p>
     </footer>
