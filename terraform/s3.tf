@@ -1,9 +1,8 @@
 locals {
-  template_content = file("index.html")
-  processed_content = replace(
-    replace(local.template_content, "{{api_url}}", aws_lambda_function_url.upload_function_url.function_url),
-    "{{turnstile_site_key}}", cloudflare_turnstile_widget.ifs_widget.sitekey
-  )
+  processed_content = templatefile("index.html", {
+    api_url            = aws_lambda_function_url.upload_function_url.function_url
+    turnstile_site_key = cloudflare_turnstile_widget.ifs_widget.id
+  })
 }
 
 resource "aws_s3_bucket" "main_bucket" {
