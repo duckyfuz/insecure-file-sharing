@@ -20,6 +20,11 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
     />
+    <script
+      src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+      async
+      defer
+    ></script>
     <style>
       :root {
         --primary: #4f46e5;
@@ -246,6 +251,15 @@
           <p>drag & drop your file here<br />or click to browse</p>
           <input type="file" id="fileInput" class="file-input" />
         </div>
+
+        <!-- Cloudflare Turnstile Widget -->
+        <div
+          class="cf-turnstile"
+          data-sitekey="{{turnstile_site_key}}"
+          data-callback="turnstileCallback"
+        ></div>
+        <br />
+
         <button id="uploadButton" class="button" disabled>upload file</button>
         <div id="output" class="output"></div>
       </div>
@@ -362,8 +376,16 @@
           outputDiv.innerHTML += `🗃️ processing file: ${file.name}\n`;
           outputDiv.scrollTop = outputDiv.scrollHeight;
 
+          // Get Turnstile token
+          const turnstileToken = turnstile.getResponse();
+          if (!turnstileToken) {
+            showError("please verify you are human.");
+            return;
+          }
+
           const payload = {
             original_filename: file.name,
+            turnstile_token: turnstileToken,
           };
 
           const apiUrl = "{{api_url}}"; // note: this is replaced by terraform during deployment
@@ -442,11 +464,13 @@
         checkUploadButtonState();
         outputDiv.innerHTML += `<span class="error">⚠️ ${message}</span>\n`;
         outputDiv.scrollTop = outputDiv.scrollHeight;
+        if (window.turnstile) turnstile.reset();
       }
 
       function resetUploadArea() {
         fileInput.value = "";
         checkUploadButtonState();
+        if (window.turnstile) turnstile.reset();
       }
 
       function checkAccessButtonState() {

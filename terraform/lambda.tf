@@ -11,6 +11,12 @@ resource "aws_lambda_function" "upload_function" {
   handler          = "upload.lambda_handler"
   runtime          = "python3.11"
   source_code_hash = data.archive_file.lambda.output_base64sha256
+
+  environment {
+    variables = {
+      TURNSTILE_SECRET_KEY = cloudflare_turnstile_widget.ifs_widget.secret
+    }
+  }
 }
 
 resource "aws_lambda_function_url" "upload_function_url" {

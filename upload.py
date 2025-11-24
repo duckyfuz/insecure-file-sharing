@@ -1,18 +1,36 @@
-import boto3
+import os
 import json
+import boto3
 import secrets
+import urllib
 
 s3_client = boto3.client("s3")
 
 
 def lambda_handler(event, context):
-    origin = event["headers"].get("origin")
-
-    # Prevent programmatic access, TODO: add authentication to lambda
-    if origin != "https://ifs.kenf.dev":
-        return {"statusCode": 403, "body": "Forbidden"}
-
     try:
+
+        body_data = json.loads(event["body"])
+
+        # Verify Turnstile Token
+        turnstile_token = body_data.get("turnstile_token")
+        if not turnstile_token:
+            return {"statusCode": 400, "body": "Missing CAPTCHA token"}
+
+        secret_key = os.environ.get("TURNSTILE_SECRET_KEY")
+        if secret_key:
+            # Verify with Cloudflare
+            url = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+            data = urllib.parse.urlencode(
+                {"secret": secret_key, "response": turnstile_token}
+            ).encode()
+
+            req = urllib.request.Request(url, data=data)
+            with urllib.request.urlopen(req) as response:
+                result = json.loads(response.read().decode())
+                if not result.get("success"):
+                    return {"statusCode": 403, "body": "CAPTCHA verification failed"}
+
         bucket_name = "ifs-storage-bucket"
 
         # Generate a random 4-character hex string for the file ID
