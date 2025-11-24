@@ -342,7 +342,7 @@
       function checkUploadButtonState() {
         if (fileInput.files.length > 0) {
           uploadButton.disabled = false;
-          uploadArea.innerHTML = `<div class="upload-icon">📄</div><p>${fileInput.files[0].name}</p>`;
+          uploadArea.innerHTML = `<div class="upload-icon">📄</div><p>$${fileInput.files[0].name}</p>`;
         } else {
           uploadButton.disabled = true;
           uploadArea.innerHTML = `
@@ -373,8 +373,7 @@
 
         const reader = new FileReader();
         reader.onload = function (event) {
-          outputDiv.innerHTML += `🗃️ processing file: ${file.name}\n`;
-          outputDiv.scrollTop = outputDiv.scrollHeight;
+          appendLog(`🗃️ processing file: $${file.name}`);
 
           // Get Turnstile token
           const turnstileToken = turnstile.getResponse();
@@ -398,7 +397,7 @@
               if (!response.ok) {
                 return response.text().then((text) => {
                   throw new Error(
-                    `Error fetching presigned URL (${response.status}): ${
+                    `Error fetching presigned URL ($${response.status}): $${
                       text || response.statusText
                     }`
                   );
@@ -433,14 +432,16 @@
             })
             .then(({ uploadResponse, fileId }) => {
               if (uploadResponse.ok) {
-                outputDiv.innerHTML += `🎉 upload successful!\n     access with code: <strong class="success">${fileId}</strong>\n     or at <a href="/${fileId}" target="_blank" rel="noopener noreferrer">https://ifs.kenf.dev/${fileId}</a>\n`;
-                outputDiv.scrollTop = outputDiv.scrollHeight;
+                appendLog(
+                  `🎉 upload successful!\n     access with code: <strong class="success">$${fileId}</strong>\n     or at <a href="/$${fileId}" target="_blank" rel="noopener noreferrer">https://ifs.kenf.dev/$${fileId}</a>\n`,
+                  "success"
+                );
                 uploadButton.innerHTML = "upload file";
                 resetUploadArea();
               } else {
                 return uploadResponse.text().then((text) => {
                   throw new Error(
-                    `Error uploading to S3 (${uploadResponse.status}): ${
+                    `Error uploading to S3 ($${uploadResponse.status}): $${
                       text || uploadResponse.statusText
                     }`
                   );
@@ -462,8 +463,7 @@
       function showError(message) {
         uploadButton.innerHTML = "upload file";
         checkUploadButtonState();
-        outputDiv.innerHTML += `<span class="error">⚠️ ${message}</span>\n`;
-        outputDiv.scrollTop = outputDiv.scrollHeight;
+        appendLog(message, "error");
         if (window.turnstile) turnstile.reset();
       }
 
@@ -490,6 +490,25 @@
           return;
         }
         window.location.href = "/" + fileName;
+      }
+
+      function appendLog(message, type = "normal") {
+        const div = document.createElement("div");
+        div.textContent = message;
+        if (type === "error") {
+          const span = document.createElement("span");
+          span.className = "error";
+          span.textContent = "⚠️ " + message;
+          div.textContent = "";
+          div.appendChild(span);
+        } else if (type === "success") {
+          // Handle success specially to allow the link
+          div.innerHTML = message;
+        } else {
+          div.textContent = message;
+        }
+        outputDiv.appendChild(div);
+        outputDiv.scrollTop = outputDiv.scrollHeight;
       }
 
       checkUploadButtonState();
