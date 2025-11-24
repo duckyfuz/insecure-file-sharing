@@ -1,5 +1,6 @@
 import boto3
 import json
+import secrets
 
 s3_client = boto3.client("s3")
 
@@ -13,30 +14,38 @@ def lambda_handler(event, context):
 
     try:
         bucket_name = "ifs-storage-bucket"
-        
+
+        # Generate a random 4-character hex string for the file ID
+        file_id = secrets.token_hex(2)
+
         body_data = json.loads(event["body"])
-        file_name = body_data["file_name"]
         original_filename = body_data["original_filename"]
 
         conditions = [
             ["content-length-range", 1, 524288000],  # allow up to 500MiB size
-            ["eq", "$Content-Disposition", f"attachment; filename=\"{original_filename}\""],
-            {'tagging': '<Tagging><TagSet><Tag><Key>expiration</Key><Value>86400</Value></Tag></TagSet></Tagging>',}
+            [
+                "eq",
+                "$Content-Disposition",
+                f'attachment; filename="{original_filename}"',
+            ],
+            {
+                "tagging": "<Tagging><TagSet><Tag><Key>expiration</Key><Value>86400</Value></Tag></TagSet></Tagging>",
+            },
         ]
 
         presigned_url = s3_client.generate_presigned_post(
             Bucket=bucket_name,
-            Key=file_name,
+            Key=file_id,
             Fields={
-                "Content-Disposition": f"attachment; filename=\"{original_filename}\"",
-                'tagging': '<Tagging><TagSet><Tag><Key>expiration</Key><Value>86400</Value></Tag></TagSet></Tagging>'
+                "Content-Disposition": f'attachment; filename="{original_filename}"',
+                "tagging": "<Tagging><TagSet><Tag><Key>expiration</Key><Value>86400</Value></Tag></TagSet></Tagging>",
             },
-            Conditions=conditions
+            Conditions=conditions,
         )
 
         return {
             "statusCode": 200,
-            "body": json.dumps({"upload_url": presigned_url}),
+            "body": json.dumps({"upload_url": presigned_url, "file_id": file_id}),
         }
 
     except Exception as e:
@@ -46,10 +55,7 @@ def lambda_handler(event, context):
 if __name__ == "__main__":
     test_event = {
         "headers": {"origin": "https://ifs.kenf.dev"},
-        "body": json.dumps({
-            "file_name": "1234.txt",
-            "original_filename": "test.txt"
-        })
+        "body": json.dumps({"file_name": "1234.txt", "original_filename": "test.txt"}),
     }
     test_context = {}
     response = lambda_handler(test_event, test_context)

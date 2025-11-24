@@ -5,12 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>IFS - Insecure File Service</title>
-    <meta name="description" content="Insecurely transfer files between internet connected devices." />
-    <meta name="keywords" content="file sharing, file transfer, online file sharing, share files online" />
+    <meta
+      name="description"
+      content="Insecurely transfer files between devices connected to the internet."
+    />
+    <meta
+      name="keywords"
+      content="file sharing, file transfer, online file sharing, share files online"
+    />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://ifs.kenf.dev/" />
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+    />
     <style>
       :root {
         --primary: #4f46e5;
@@ -25,15 +34,15 @@
         --red-500: #ef4444;
         --green-500: #10b981;
       }
-      
+
       * {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
       }
-      
+
       body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
         background: linear-gradient(135deg, #f5f7fa 0%, #eef1f5 100%);
         color: var(--gray-800);
         min-height: 100vh;
@@ -43,7 +52,7 @@
         align-items: center;
         line-height: 1.5;
       }
-      
+
       .container {
         display: flex;
         max-width: 900px;
@@ -52,29 +61,29 @@
         border-radius: 16px;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
         overflow: hidden;
-        margin-top: auto; 
+        margin-top: auto;
         margin-bottom: 1rem; /* Add some margin below container before footer */
       }
-      
+
       .panel {
         flex: 1;
         padding: 2.5rem;
         display: flex;
         flex-direction: column;
       }
-      
+
       .divider {
         width: 1px;
         background-color: var(--gray-200);
       }
-      
+
       h2 {
         font-weight: 600;
         font-size: 1.5rem;
         margin-bottom: 1.5rem;
         color: var(--gray-800);
       }
-      
+
       .upload-area {
         border: 2px dashed var(--gray-300);
         border-radius: 8px;
@@ -90,22 +99,22 @@
         align-items: center;
         overflow: hidden;
       }
-      
+
       .upload-area:hover {
         border-color: var(--primary);
         background-color: var(--gray-50);
       }
-      
+
       .upload-icon {
         font-size: 2rem;
         margin-bottom: 0.5rem;
         color: var(--gray-700);
       }
-      
+
       .file-input {
         display: none;
       }
-      
+
       .button {
         background-color: var(--primary);
         color: white;
@@ -118,11 +127,11 @@
         transition: background-color 0.2s, color 0.2s;
         width: 100%;
       }
-      
+
       .button:hover {
         background-color: var(--primary-hover);
       }
-      
+
       .button:disabled,
       .button[disabled] {
         background-color: var(--gray-200) !important;
@@ -132,7 +141,7 @@
 
       .button:disabled:hover,
       .button[disabled]:hover {
-        background-color: var(--gray-200) !important; 
+        background-color: var(--gray-200) !important;
         color: var(--gray-700) !important;
       }
 
@@ -147,16 +156,16 @@
         white-space: pre-wrap;
         font-size: 0.9rem;
       }
-      
+
       .success {
         color: var(--green-500);
         font-weight: 500;
       }
-      
+
       .error {
         color: var(--red-500);
       }
-      
+
       .search-input {
         width: 100%;
         padding: 0.75rem 1rem;
@@ -166,13 +175,13 @@
         margin-bottom: 1rem;
         transition: border-color 0.2s;
       }
-      
+
       .search-input:focus {
         outline: none;
         border-color: var(--primary);
         box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
       }
-      
+
       .loading {
         display: inline-block;
         width: 1rem;
@@ -184,11 +193,13 @@
         margin-right: 0.5rem;
         vertical-align: middle;
       }
-      
+
       @keyframes spin {
-        to { transform: rotate(360deg); }
+        to {
+          transform: rotate(360deg);
+        }
       }
-      
+
       @media (max-width: 768px) {
         .container {
           flex-direction: column;
@@ -196,11 +207,11 @@
           margin-top: 1rem;
           margin-bottom: 1rem;
         }
-        
+
         .panel {
           padding: 1.5rem;
         }
-        
+
         .divider {
           width: 100%;
           height: 1px;
@@ -232,61 +243,77 @@
         <h2>upload file</h2>
         <div class="upload-area" id="uploadArea">
           <div class="upload-icon">📤</div>
-          <p>drag & drop your file here<br>or click to browse</p>
+          <p>drag & drop your file here<br />or click to browse</p>
           <input type="file" id="fileInput" class="file-input" />
         </div>
         <button id="uploadButton" class="button" disabled>upload file</button>
         <div id="output" class="output"></div>
       </div>
-      
+
       <div class="divider"></div>
-      
+
       <div class="panel">
         <h2>access shared file</h2>
-        <input type="text" id="fileNameInput" class="search-input" placeholder="enter file hash (e.g., a1b2)" />
-        <button id="accessFileButton" onclick="redirectToFile()" class="button" disabled>access file</button>
+        <input
+          type="text"
+          id="fileNameInput"
+          class="search-input"
+          placeholder="enter file hash (e.g., a1b2)"
+        />
+        <button
+          id="accessFileButton"
+          onclick="redirectToFile()"
+          class="button"
+          disabled
+        >
+          access file
+        </button>
       </div>
     </div>
 
     <script>
-      const uploadArea = document.getElementById('uploadArea');
-      const fileInput = document.getElementById('fileInput');
-      const uploadButton = document.getElementById('uploadButton');
-      const outputDiv = document.getElementById('output');
-      const fileNameInput = document.getElementById('fileNameInput');
-      const accessFileButton = document.getElementById('accessFileButton');
-      
-      uploadArea.addEventListener('click', () => fileInput.click());
-      
-      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      const uploadArea = document.getElementById("uploadArea");
+      const fileInput = document.getElementById("fileInput");
+      const uploadButton = document.getElementById("uploadButton");
+      const outputDiv = document.getElementById("output");
+      const fileNameInput = document.getElementById("fileNameInput");
+      const accessFileButton = document.getElementById("accessFileButton");
+
+      uploadArea.addEventListener("click", () => fileInput.click());
+
+      ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
         uploadArea.addEventListener(eventName, preventDefaults, false);
       });
-      
+
       function preventDefaults(e) {
         e.preventDefault();
         e.stopPropagation();
       }
-      
-      ['dragenter', 'dragover'].forEach(eventName => {
+
+      ["dragenter", "dragover"].forEach((eventName) => {
         uploadArea.addEventListener(eventName, highlight, false);
       });
-      
-      ['dragleave', 'drop'].forEach(eventName => {
+
+      ["dragleave", "drop"].forEach((eventName) => {
         uploadArea.addEventListener(eventName, unhighlight, false);
       });
-      
+
       function highlight() {
-        uploadArea.style.borderColor = getComputedStyle(document.documentElement).getPropertyValue('--primary');
-        uploadArea.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--gray-50');
+        uploadArea.style.borderColor = getComputedStyle(
+          document.documentElement
+        ).getPropertyValue("--primary");
+        uploadArea.style.backgroundColor = getComputedStyle(
+          document.documentElement
+        ).getPropertyValue("--gray-50");
       }
-      
+
       function unhighlight() {
-        uploadArea.style.borderColor = '';
-        uploadArea.style.backgroundColor = '';
+        uploadArea.style.borderColor = "";
+        uploadArea.style.backgroundColor = "";
       }
-      
-      uploadArea.addEventListener('drop', handleDrop, false);
-      
+
+      uploadArea.addEventListener("drop", handleDrop, false);
+
       function handleDrop(e) {
         const dt = e.dataTransfer;
         const files = dt.files;
@@ -295,9 +322,9 @@
           checkUploadButtonState();
         }
       }
-      
-      fileInput.addEventListener('change', checkUploadButtonState);
-      
+
+      fileInput.addEventListener("change", checkUploadButtonState);
+
       function checkUploadButtonState() {
         if (fileInput.files.length > 0) {
           uploadButton.disabled = false;
@@ -310,8 +337,8 @@
           `;
         }
       }
-      
-      uploadButton.addEventListener('click', uploadFile);
+
+      uploadButton.addEventListener("click", uploadFile);
 
       function uploadFile() {
         uploadButton.disabled = true;
@@ -324,7 +351,7 @@
           return;
         }
 
-        const maxSize = 500 * 1024 * 1024;  // 500MB
+        const maxSize = 500 * 1024 * 1024; // 500MB
         if (file.size > maxSize) {
           showError("file size exceeds 500MB limit.");
           return;
@@ -332,91 +359,105 @@
 
         const reader = new FileReader();
         reader.onload = function (event) {
-          const fileContent = event.target.result;
-          sha256(fileContent).then((hash) => {
-            const shortHash = hash.slice(0, 4);
-            outputDiv.innerHTML += `🗃️ processing file: ${file.name}\n`;
-            outputDiv.scrollTop = outputDiv.scrollHeight;
+          outputDiv.innerHTML += `🗃️ processing file: ${file.name}\n`;
+          outputDiv.scrollTop = outputDiv.scrollHeight;
 
-            const payload = {
-              file_name: shortHash,
-              original_filename: file.name
-            };
+          const payload = {
+            original_filename: file.name,
+          };
 
-            const apiUrl = "{{api_url}}"; // note: this is replaced by terraform during deployment
-            fetch(apiUrl, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(payload),
-            })
-            .then(response => {
+          const apiUrl = "{{api_url}}"; // note: this is replaced by terraform during deployment
+          fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          })
+            .then((response) => {
               if (!response.ok) {
-                return response.text().then(text => { 
-                  throw new Error(`Error fetching presigned URL (${response.status}): ${text || response.statusText}`); 
+                return response.text().then((text) => {
+                  throw new Error(
+                    `Error fetching presigned URL (${response.status}): ${
+                      text || response.statusText
+                    }`
+                  );
                 });
               }
               return response.json();
             })
-            .then(data => {
-              if (!data.upload_url || !data.upload_url.url || !data.upload_url.fields) {
+            .then((data) => {
+              if (
+                !data.upload_url ||
+                !data.upload_url.url ||
+                !data.upload_url.fields ||
+                !data.file_id
+              ) {
                 throw new Error("Invalid presigned URL data received.");
               }
               const presignedUrl = data.upload_url.url;
+              const fileId = data.file_id;
               const formData = new FormData();
-              console.log(data.upload_url.fields)
-              Object.keys(data.upload_url.fields).forEach(key => {
+              console.log(data.upload_url.fields);
+              Object.keys(data.upload_url.fields).forEach((key) => {
                 formData.append(key, data.upload_url.fields[key]);
               });
               formData.append("file", file);
               console.log(formData);
-              return fetch(presignedUrl, { method: "POST", body: formData });
+              return fetch(presignedUrl, {
+                method: "POST",
+                body: formData,
+              }).then((uploadResponse) => {
+                return { uploadResponse, fileId };
+              });
             })
-            .then(uploadResponse => {
+            .then(({ uploadResponse, fileId }) => {
               if (uploadResponse.ok) {
-                outputDiv.innerHTML += `🎉 upload successful!\n     access with code: <strong class="success">${shortHash}</strong>\n     or at <a href="/${shortHash}" target="_blank" rel="noopener noreferrer">https://ifs.kenf.dev/${shortHash}</a>\n`;
+                outputDiv.innerHTML += `🎉 upload successful!\n     access with code: <strong class="success">${fileId}</strong>\n     or at <a href="/${fileId}" target="_blank" rel="noopener noreferrer">https://ifs.kenf.dev/${fileId}</a>\n`;
                 outputDiv.scrollTop = outputDiv.scrollHeight;
-                uploadButton.innerHTML = 'upload file'; 
+                uploadButton.innerHTML = "upload file";
                 resetUploadArea();
               } else {
-                return uploadResponse.text().then(text => { throw new Error(`Error uploading to S3 (${uploadResponse.status}): ${text || uploadResponse.statusText}`); });
+                return uploadResponse.text().then((text) => {
+                  throw new Error(
+                    `Error uploading to S3 (${uploadResponse.status}): ${
+                      text || uploadResponse.statusText
+                    }`
+                  );
+                });
               }
             })
-            .catch(error => {
+            .catch((error) => {
               showError(`upload failed: ${error.message}`);
             });
-          }).catch(error => {
-             showError(`hashing failed: ${error.message}`);
-          });
         };
-        reader.onerror = function() {
-            showError("Error reading file.");
-            uploadButton.innerHTML = 'upload file';
-            resetUploadArea();
+        reader.onerror = function () {
+          showError("Error reading file.");
+          uploadButton.innerHTML = "upload file";
+          resetUploadArea();
         };
         reader.readAsBinaryString(file);
       }
 
       function showError(message) {
-        uploadButton.innerHTML = 'upload file';
-        checkUploadButtonState(); 
+        uploadButton.innerHTML = "upload file";
+        checkUploadButtonState();
         outputDiv.innerHTML += `<span class="error">⚠️ ${message}</span>\n`;
         outputDiv.scrollTop = outputDiv.scrollHeight;
       }
 
       function resetUploadArea() {
-        fileInput.value = '';
+        fileInput.value = "";
         checkUploadButtonState();
       }
 
       function checkAccessButtonState() {
-        if (fileNameInput.value.trim() === '') {
+        if (fileNameInput.value.trim() === "") {
           accessFileButton.disabled = true;
         } else {
           accessFileButton.disabled = false;
         }
       }
 
-      fileNameInput.addEventListener('input', checkAccessButtonState);
+      fileNameInput.addEventListener("input", checkAccessButtonState);
 
       function redirectToFile() {
         const fileName = fileNameInput.value.trim();
@@ -427,20 +468,16 @@
         window.location.href = "/" + fileName;
       }
 
-      function sha256(str) {
-        const buffer = new TextEncoder().encode(str);
-        return crypto.subtle.digest("SHA-256", buffer).then(hashBuffer => {
-          const hashArray = Array.from(new Uint8Array(hashBuffer));
-          return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        });
-      }
-
       checkUploadButtonState();
       checkAccessButtonState();
-
     </script>
     <footer>
-      <p>this was made by an indie developer. explore some other projects at <a href="https://www.kenf.dev" target="_blank" rel="noopener noreferrer">www.kenf.dev</a>.</p>
+      <p>
+        this was made by an indie developer. explore some other projects at
+        <a href="https://www.kenf.dev" target="_blank" rel="noopener noreferrer"
+          >www.kenf.dev</a
+        >.
+      </p>
     </footer>
   </body>
 </html>
