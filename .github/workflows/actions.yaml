@@ -39,6 +39,14 @@ jobs:
         run: terraform plan -out=tfplan
         working-directory: ./terraform
 
+      - name: Capture plan output
+        id: plan_output
+        run: |
+          echo "plan<<EOF" >> $GITHUB_OUTPUT
+          terraform show -no-color tfplan >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        working-directory: ./terraform
+
       - name: Wait for manual approval
         uses: trstringer/manual-approval@v1
         with:
@@ -46,7 +54,14 @@ jobs:
           approvers: duckyfuz
           minimum-approvals: 1
           issue-title: "Approve Terraform apply"
-          issue-body: "Please approve or deny the Terraform apply for this push to main. Reply with 'approve' or 'deny'."
+          issue-body: |
+            **Terraform Plan for this push to main:**
+
+            ```
+            ${{ steps.plan_output.outputs.plan }}
+            ```
+
+            Please review the plan above. Reply with 'approve' or 'deny'.
           exclude-workflow-initiator-as-approver: false
           fail-on-denial: true
 
