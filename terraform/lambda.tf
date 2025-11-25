@@ -18,7 +18,7 @@ resource "aws_lambda_function" "upload_function" {
     }
   }
 
-  reserved_concurrent_executions = 1
+  reserved_concurrent_executions = 10
 }
 
 resource "aws_lambda_function_url" "upload_function_url" {
