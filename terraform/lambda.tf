@@ -17,8 +17,6 @@ resource "aws_lambda_function" "upload_function" {
       TURNSTILE_SECRET_KEY = cloudflare_turnstile_widget.ifs_widget.secret
     }
   }
-
-  reserved_concurrent_executions = 10
 }
 
 resource "aws_lambda_function_url" "upload_function_url" {
