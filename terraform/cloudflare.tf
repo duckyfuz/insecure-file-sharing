@@ -26,7 +26,7 @@ resource "cloudflare_record" "cloudfront_to_ifs_cname" {
   type    = "CNAME"
   content = aws_cloudfront_distribution.s3_distribution.domain_name
   ttl     = 3600
-  proxied = false
+  proxied = true
 }
 
 resource "cloudflare_turnstile_widget" "ifs_widget" {
