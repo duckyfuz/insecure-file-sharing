@@ -255,7 +255,7 @@
         <!-- Cloudflare Turnstile Widget -->
         <div
           class="cf-turnstile"
-          data-sitekey="{{turnstile_site_key}}"
+          data-sitekey="${turnstile_site_key}"
           data-callback="turnstileCallback"
         ></div>
         <br />
@@ -387,7 +387,7 @@
             turnstile_token: turnstileToken,
           };
 
-          const apiUrl = "{{api_url}}"; // note: this is replaced by terraform during deployment
+          const apiUrl = "${api_url}";
           fetch(apiUrl, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
