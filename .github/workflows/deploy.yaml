@@ -41,7 +41,9 @@ jobs:
 
       - name: Terraform Format Check
         id: fmt
-        run: terraform fmt -check -recursive
+        run: |
+          terraform fmt -check -recursive
+          echo "exitcode=$?" >> $GITHUB_OUTPUT
         working-directory: ./infra
         continue-on-error: true
 
@@ -89,10 +91,10 @@ jobs:
 
             | Step | Status |
             |------|--------|
-            | 🖌️ Format | ${{ steps.fmt.outcome == 'success' && '✅ Passed' || '⚠️ Failed' }} |
+            | 🖌️ Format | ${{ steps.fmt.outputs.exitcode == '0' && '✅ Passed' || '⚠️ Failed' }} |
             | ⚙️ Init | ${{ steps.init.outcome == 'success' && '✅ Passed' || '❌ Failed' }} |
             | 📝 Validate | ${{ steps.validate.outcome == 'success' && '✅ Passed' || '❌ Failed' }} |
-            | 📋 Plan | ${{ steps.plan.outcome == 'success' && '✅ Passed' || '⚠️ Has Changes' }} |
+            | 📋 Plan | ${{ steps.plan.outputs.exitcode == '0' && '✅ No Changes' || steps.plan.outputs.exitcode == '2' && '⚠️ Has Changes' || '❌ Error' }} |
 
             <details>
             <summary>Show Plan Output</summary>
