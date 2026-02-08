@@ -61,7 +61,7 @@ resource "aws_s3_object" "index_html" {
   bucket       = aws_s3_bucket.main_bucket.bucket
   key          = "index.html"
   content_type = "text/html"
-  etag         = filemd5("${path.module}/../apps/web/index.html")
+  etag         = md5(local.processed_content)
 
   content = local.processed_content
 }
