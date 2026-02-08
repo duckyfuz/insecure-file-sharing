@@ -1,0 +1,73 @@
+# IFS - Insecure File Sharing
+
+A simple, ephemeral file-sharing service. Upload a file, get a 4-character code, share it. Files auto-delete after a day.
+
+**Live at:** [ifs.kenf.dev](https://ifs.kenf.dev)
+
+## Features
+
+- 📤 Drag & drop file uploads (up to 500MB)
+- 🔗 Short 4-character share codes
+- ⏱️ 24-hour auto-expiration
+- 🤖 Cloudflare Turnstile CAPTCHA protection
+- 🌐 Global CDN via CloudFront
+
+## Architecture
+
+```
+User → CloudFront → S3 (static site)
+         ↓
+      Lambda → S3 (presigned upload URL)
+```
+
+## Project Structure
+
+```
+├── apps/
+│   ├── web/          # Main app (index.html)
+│   └── landing/      # Landing site
+├── functions/
+│   └── upload.py     # Lambda: generates presigned URLs
+├── infra/            # Terraform infrastructure
+└── .github/workflows # CI/CD pipelines
+```
+
+## Setup
+
+```bash
+git clone https://github.com/duckyfuz/insecure-file-sharing.git
+cd insecure-file-sharing
+npm install  # Required for commit hooks
+```
+
+## Development
+
+Commits use [Conventional Commits](https://www.conventionalcommits.org/):
+
+```bash
+git commit -m "feat: add progress bar"
+git commit -m "fix: resolve upload timeout"
+```
+
+## Deployment
+
+Push to `main` triggers:
+
+1. `terraform plan` → shown in PR comments
+2. Manual approval via GitHub environment
+3. `terraform apply`
+
+## Tech Stack
+
+| Component | Technology          |
+| --------- | ------------------- |
+| Frontend  | Vanilla HTML/CSS/JS |
+| Backend   | AWS Lambda (Python) |
+| Storage   | S3 + CloudFront     |
+| DNS       | Cloudflare          |
+| IaC       | Terraform           |
+| CI/CD     | GitHub Actions      |
+
+## License
+
+Apache
