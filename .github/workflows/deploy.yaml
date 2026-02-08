@@ -84,6 +84,9 @@ jobs:
 
             const body = `## Terraform Plan Results
 
+            **Commit:** \`${{ github.event.pull_request.head.sha }}\`
+            **Message:** ${{ github.event.pull_request.title }}
+
             | Step | Status |
             |------|--------|
             | 🖌️ Format | ${{ steps.fmt.outcome == 'success' && '✅ Passed' || '⚠️ Failed' }} |
