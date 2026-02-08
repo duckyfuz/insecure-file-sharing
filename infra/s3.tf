@@ -1,5 +1,5 @@
 locals {
-  processed_content = templatefile("index.html", {
+  processed_content = templatefile("${path.module}/../apps/web/index.html", {
     api_url            = aws_lambda_function_url.upload_function_url.function_url
     turnstile_site_key = cloudflare_turnstile_widget.ifs_widget.id
   })
@@ -61,7 +61,7 @@ resource "aws_s3_object" "index_html" {
   bucket       = aws_s3_bucket.main_bucket.bucket
   key          = "index.html"
   content_type = "text/html"
-  etag         = filemd5("index.html")
+  etag         = md5(local.processed_content)
 
   content = local.processed_content
 }
