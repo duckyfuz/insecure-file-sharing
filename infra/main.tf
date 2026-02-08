@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "ap-southeast-1"
+  region = var.aws_region
 }
 
 provider "aws" {
@@ -7,12 +7,11 @@ provider "aws" {
   alias  = "us-east-1"
 }
 
-# provider "cloudflare" {
-#   api_token = var.cloudflare_api_token
-# }
+provider "cloudflare" {}
 
 terraform {
   backend "s3" {
+    # NOTE: Backend config cannot use variables - update these values directly.
     bucket = "ken-tf-state-bucket"
     key    = "insecure-file-sharing-tf-key"
     region = "ap-southeast-1"
@@ -27,5 +26,6 @@ terraform {
 }
 
 locals {
-  s3_origin_id = "IfsS3Origin"
+  s3_origin_id = "${var.project_name}-s3-origin"
+  fqdn         = "${var.subdomain}.${var.domain}"
 }
