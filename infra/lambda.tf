@@ -1,6 +1,6 @@
 data "archive_file" "lambda" {
   type        = "zip"
-  source_file = "${path.module}/../upload.py"
+  source_file = "${path.module}/../functions/upload.py"
   output_path = "lambda_function_payload.zip"
 }
 

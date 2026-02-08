@@ -35,12 +35,12 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
-        working-directory: ./terraform
+        working-directory: ./infra
 
       - name: Terraform Plan Destroy
         run: terraform plan -destroy -no-color
-        working-directory: ./terraform
+        working-directory: ./infra
 
       - name: Terraform Destroy
         run: terraform destroy -auto-approve
-        working-directory: ./terraform
+        working-directory: ./infra
