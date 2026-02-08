@@ -26,14 +26,13 @@ export default function Home() {
           </div>
 
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
-            share files
-            <br />
-            <span className="gradient-text">instantly</span>
+            share files <span className="gradient-text">instantly</span>
           </h1>
 
           <p className="text-xl text-zinc-400 max-w-2xl mx-auto mb-10">
-            upload a file, get a 4-character code, share it. no sign-up
-            required. files auto-delete after 24 hours.
+            upload a file, get a 4-character code, share it.
+            <br />
+            no sign-up required. files auto-delete after 24 hours.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -76,53 +75,36 @@ export default function Home() {
               title="auto-delete"
               description="files are automatically deleted after 24 hours. no cleanup needed."
             />
-            <FeatureCard
-              icon="🔒"
-              title="captcha protected"
-              description="cloudflare turnstile prevents abuse and bot uploads."
-            />
-            <FeatureCard
-              icon="🌐"
-              title="global cdn"
-              description="powered by aws cloudfront for fast downloads worldwide."
-            />
-            <FeatureCard
-              icon="💸"
-              title="100% free"
-              description="no accounts, no payments, no tracking. just file sharing."
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* How it Works */}
-      <section className="py-24 px-6 bg-gradient-to-b from-transparent via-indigo-500/5 to-transparent">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-16">how it works</h2>
-
-          <div className="flex flex-col md:flex-row gap-8 justify-center items-center">
-            <Step number="1" text="upload your file" />
-            <Arrow />
-            <Step number="2" text="get a 4-char code" />
-            <Arrow />
-            <Step number="3" text="share the code" />
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 px-6">
-        <div className="max-w-2xl mx-auto text-center gradient-border p-12 glow">
-          <h2 className="text-3xl font-bold mb-4">ready to share?</h2>
-          <p className="text-zinc-400 mb-8">
-            no sign-up required. start sharing files in seconds.
-          </p>
-          <Link
-            href="https://ifs.kenf.dev"
-            className="inline-block px-8 py-4 text-lg font-semibold rounded-xl bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-600 hover:to-cyan-600 transition-all transform hover:scale-105"
-          >
-            open ifs →
-          </Link>
+      <section className="py-24 px-6 relative">
+        {/* Background orbs */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/2 left-1/4 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl" />
+          <div className="absolute top-1/2 right-1/4 w-64 h-64 bg-cyan-500/20 rounded-full blur-3xl" />
+        </div>
+
+        <div className="relative max-w-4xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8 p-12 md:p-16 rounded-3xl bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/10 backdrop-blur-sm">
+            <div className="text-center md:text-left">
+              <h2 className="text-3xl md:text-4xl font-bold mb-2 gradient-text">
+                ready to share?
+              </h2>
+              <p className="text-zinc-400 text-lg">
+                no sign-up • no tracking • no limits
+              </p>
+            </div>
+            <Link
+              href="https://ifs.kenf.dev"
+              className="shrink-0 inline-flex items-center gap-2 px-10 py-5 text-xl font-semibold rounded-2xl bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-400 hover:to-cyan-400 transition-all transform hover:scale-105 hover:shadow-lg hover:shadow-indigo-500/25"
+            >
+              open ifs
+              <span className="text-2xl">→</span>
+            </Link>
+          </div>
         </div>
       </section>
 
