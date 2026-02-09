@@ -17,7 +17,7 @@ resource "aws_iam_role" "lambda_role" {
 
 resource "aws_iam_policy" "allow_s3_access" {
   name        = "allow_s3_policy"
-  description = "Grant access toS3"
+  description = "Grant access to S3"
 
   policy = jsonencode({
     "Version" : "2012-10-17",
