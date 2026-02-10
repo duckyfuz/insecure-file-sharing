@@ -1,5 +1,5 @@
 resource "aws_iam_role" "lambda_role" {
-  name = "lambda_role"
+  name = "${var.project_name}_lambda_role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -16,8 +16,8 @@ resource "aws_iam_role" "lambda_role" {
 }
 
 resource "aws_iam_policy" "allow_s3_access" {
-  name        = "allow_s3_policy"
-  description = "Grant access toS3"
+  name        = "${var.project_name}_s3_access_policy"
+  description = "Grant access to S3 for ${var.project_name}"
 
   policy = jsonencode({
     "Version" : "2012-10-17",
@@ -32,8 +32,8 @@ resource "aws_iam_policy" "allow_s3_access" {
           "s3:PutObjectTagging"
         ],
         "Resource" : [
-          "arn:aws:s3:::ifs-storage-bucket",
-          "arn:aws:s3:::ifs-storage-bucket/*",
+          aws_s3_bucket.main_bucket.arn,
+          "${aws_s3_bucket.main_bucket.arn}/*",
         ]
       }
     ]

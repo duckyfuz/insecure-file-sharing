@@ -6,17 +6,17 @@ locals {
 }
 
 resource "aws_s3_bucket" "main_bucket" {
-  bucket        = "ifs-storage-bucket"
+  bucket        = var.s3_bucket_name
   force_destroy = true
 }
 
-resource "aws_s3_bucket_cors_configuration" "allow_ifs_cors" {
+resource "aws_s3_bucket_cors_configuration" "allow_cors" {
   bucket = aws_s3_bucket.main_bucket.id
 
   cors_rule {
     allowed_headers = ["*"]
     allowed_methods = ["PUT", "POST"]
-    allowed_origins = ["https://ifs.kenf.dev"]
+    allowed_origins = ["https://${local.fqdn}"]
     expose_headers  = ["ETag"]
     max_age_seconds = 3000
   }

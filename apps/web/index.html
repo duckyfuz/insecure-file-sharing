@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -14,7 +14,7 @@
       content="file sharing, file transfer, online file sharing, share files online"
     />
     <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://ifs.kenf.dev/" />
+    <link rel="canonical" href="https://ifs-app.kenf.dev/" />
 
     <link
       rel="stylesheet"
@@ -47,7 +47,11 @@
       }
 
       body {
-        font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
         background: linear-gradient(135deg, #f5f7fa 0%, #eef1f5 100%);
         color: var(--gray-800);
         min-height: 100vh;
@@ -129,7 +133,9 @@
         font-size: 1rem;
         font-weight: 500;
         cursor: pointer;
-        transition: background-color 0.2s, color 0.2s;
+        transition:
+          background-color 0.2s,
+          color 0.2s;
         width: 100%;
       }
 
@@ -314,10 +320,10 @@
 
       function highlight() {
         uploadArea.style.borderColor = getComputedStyle(
-          document.documentElement
+          document.documentElement,
         ).getPropertyValue("--primary");
         uploadArea.style.backgroundColor = getComputedStyle(
-          document.documentElement
+          document.documentElement,
         ).getPropertyValue("--gray-50");
       }
 
@@ -399,7 +405,7 @@
                   throw new Error(
                     `Error fetching presigned URL ($${response.status}): $${
                       text || response.statusText
-                    }`
+                    }`,
                   );
                 });
               }
@@ -433,8 +439,8 @@
             .then(({ uploadResponse, fileId }) => {
               if (uploadResponse.ok) {
                 appendLog(
-                  `🎉 upload successful!\n     access with code: <strong class="success">$${fileId}</strong>\n     or at <a href="/$${fileId}" target="_blank" rel="noopener noreferrer">https://ifs.kenf.dev/$${fileId}</a>\n`,
-                  "success"
+                  `🎉 upload successful!\n     access with code: <strong class="success">$${fileId}</strong>\n     or at <a href="/$${fileId}" target="_blank" rel="noopener noreferrer">https://ifs-app.kenf.dev/$${fileId}</a>\n`,
+                  "success",
                 );
                 uploadButton.innerHTML = "upload file";
                 resetUploadArea();
@@ -443,7 +449,7 @@
                   throw new Error(
                     `Error uploading to S3 ($${uploadResponse.status}): $${
                       text || uploadResponse.statusText
-                    }`
+                    }`,
                   );
                 });
               }
