@@ -37,7 +37,7 @@ This directory contains Terraform configuration for deploying IFS to AWS with Cl
 
 ### For Forkers
 
-1. **Update `terraform.tfvars`** with your values:
+1. **Update `terraform.public.tfvars`** with your values:
 
    ```hcl
    domain                = "yourdomain.com"
@@ -84,13 +84,13 @@ This directory contains Terraform configuration for deploying IFS to AWS with Cl
 terraform init
 
 # Preview changes
-terraform plan
+terraform plan -var-file=terraform.public.tfvars
 
 # Apply changes
-terraform apply
+terraform apply -var-file=terraform.public.tfvars
 
 # Destroy (when needed)
-terraform destroy
+terraform destroy -var-file=terraform.public.tfvars
 ```
 
 ### GitHub Actions
@@ -134,7 +134,7 @@ terraform destroy
 infra/
 ├── main.tf          # Providers and backend config
 ├── variables.tf     # Variable definitions
-├── terraform.tfvars # Your configuration values
+├── terraform.public.tfvars # Your configuration values
 ├── cloudflare.tf    # Cloudflare DNS and Turnstile
 ├── cloudfront.tf    # CloudFront distribution and ACM cert
 ├── s3.tf            # S3 bucket and policies
