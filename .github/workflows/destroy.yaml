@@ -38,9 +38,9 @@ jobs:
         working-directory: ./infra
 
       - name: Terraform Plan Destroy
-        run: terraform plan -destroy -no-color
+        run: terraform plan -var-file=terraform.public.tfvars -destroy -no-color
         working-directory: ./infra
 
       - name: Terraform Destroy
-        run: terraform destroy -auto-approve
+        run: terraform destroy -var-file=terraform.public.tfvars -auto-approve
         working-directory: ./infra
