@@ -17,3 +17,7 @@ cloudflare_zone_id    = "47e2c26d25d25ff12cb21a0b2a5e1a4d"
 aws_region     = "ap-southeast-1"
 project_name   = "ifs"
 s3_bucket_name = "ifs-storage-bucket"
+
+# Vercel landing page (leave empty to skip CNAME creation)
+vercel_subdomain = "ifs"
+vercel_cname     = "d756e5009a9b5a81.vercel-dns-017.com"

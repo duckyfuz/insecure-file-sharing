@@ -44,3 +44,15 @@ variable "s3_bucket_name" {
   type        = string
   default     = "ifs-storage-bucket"
 }
+
+variable "vercel_subdomain" {
+  description = "Subdomain for the Vercel landing page (e.g., ifs)"
+  type        = string
+  default     = ""
+}
+
+variable "vercel_cname" {
+  description = "Vercel DNS target for the landing page (e.g., xxx.vercel-dns-017.com). Leave empty to skip."
+  type        = string
+  default     = ""
+}
