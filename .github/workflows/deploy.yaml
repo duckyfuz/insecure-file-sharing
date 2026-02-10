@@ -102,13 +102,6 @@ jobs:
             **Commit:** \`${{ github.event.pull_request.head.sha }}\`
             **Message:** ${commitMessage}
 
-            | Step | Status |
-            |------|--------|
-            | 🖌️ Format | ${{ steps.fmt.outputs.exitcode == '0' && '✅ Passed' || '⚠️ Failed' }} |
-            | ⚙️ Init | ${{ steps.init.outcome == 'success' && '✅ Passed' || '❌ Failed' }} |
-            | 📝 Validate | ${{ steps.validate.outcome == 'success' && '✅ Passed' || '❌ Failed' }} |
-            | 📋 Plan | ${{ steps.plan.outputs.exitcode == '0' && '✅ No Changes' || steps.plan.outputs.exitcode == '2' && '⚠️ Has Changes' || '❌ Error' }} |
-
             <details>
             <summary>Show Plan Output</summary>
 
