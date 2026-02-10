@@ -330,7 +330,7 @@ crash.*.log
 *.tfvars.json
 
 # BUT allow our infra tfvars (contains only non-sensitive identifiers)
-!infra/terraform.tfvars
+!infra/terraform.public.tfvars
 
 # Ignore override files as they are usually used to override resources locally and so
 # are not checked in
