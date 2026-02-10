@@ -7,7 +7,7 @@
 
 # Domain configuration
 domain    = "kenf.dev"
-subdomain = "ifs"
+subdomain = "ifs-app"
 
 # Cloudflare identifiers (NOT credentials - these are public IDs)
 cloudflare_account_id = "711893ae9189134e1d258871f2019476"
