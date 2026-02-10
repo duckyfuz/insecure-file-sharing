@@ -86,7 +86,7 @@ jobs:
               ? planOutput.substring(0, 60000) + '\n\n... (truncated)'
               : planOutput;
 
-            const body = `## Terraform Plan Results
+            const body = `<!-- terraform-plan-comment -->\n            ## Terraform Plan Results
 
             **Commit:** \`${{ github.event.pull_request.head.sha }}\`
             **Message:** ${{ github.event.pull_request.title }}
@@ -107,12 +107,32 @@ jobs:
 
             </details>`;
 
-            github.rest.issues.createComment({
+            // Find existing comment with our marker
+            const { data: comments } = await github.rest.issues.listComments({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: body
             });
+
+            const existing = comments.find(c =>
+              c.body?.includes('<!-- terraform-plan-comment -->')
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                comment_id: existing.id,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body,
+              });
+            }
 
   # Only runs on push to main, requires environment approval
   apply:
