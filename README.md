@@ -2,7 +2,7 @@
 
 A simple, ephemeral file-sharing service. Upload a file, get a 4-character code, share it. Files auto-delete after a day.
 
-**Live at:** [ifs.kenf.dev](https://ifs.kenf.dev)
+**Live at:** [ifs-app.kenf.dev](https://ifs-app.kenf.dev)
 
 ## Features
 

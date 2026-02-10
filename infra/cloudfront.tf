@@ -1,5 +1,5 @@
 resource "aws_cloudfront_origin_access_identity" "oai" {
-  comment = "OAI for ifs.kenf.dev"
+  comment = "OAI for ${local.fqdn}"
 }
 
 resource "aws_cloudfront_distribution" "s3_distribution" {
@@ -16,7 +16,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   is_ipv6_enabled     = true
   default_root_object = "index.html"
 
-  aliases = ["${local.subdomain_name}.kenf.dev"]
+  aliases = [local.fqdn]
 
   default_cache_behavior {
     allowed_methods  = ["GET", "HEAD"]
@@ -54,7 +54,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 
 resource "aws_acm_certificate" "subdomain_cert" {
   provider          = aws.us-east-1
-  domain_name       = "${local.subdomain_name}.kenf.dev"
+  domain_name       = local.fqdn
   validation_method = "DNS"
 
   lifecycle {
