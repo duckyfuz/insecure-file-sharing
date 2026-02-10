@@ -60,8 +60,11 @@ jobs:
       - name: Terraform Plan
         id: plan
         run: |
-          terraform plan -no-color -out=tfplan -detailed-exitcode 2>&1 | tee plan_output.txt
-          echo "exitcode=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
+          set +e
+          terraform plan -var-file=terraform.public.tfvars -no-color -out=tfplan -detailed-exitcode 2>&1 | tee plan_output.txt
+          PLAN_EXIT=${PIPESTATUS[0]}
+          set -e
+          echo "exitcode=$PLAN_EXIT" >> $GITHUB_OUTPUT
         working-directory: ./infra
         continue-on-error: true
 
