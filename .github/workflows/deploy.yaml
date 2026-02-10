@@ -68,7 +68,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: tfplan
-          path: infra/tfplan
+          path: |
+            infra/tfplan
+            infra/lambda_function_payload.zip
           retention-days: 1
 
       - name: Comment Plan on PR

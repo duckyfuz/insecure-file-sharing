@@ -1,11 +1,11 @@
 data "archive_file" "lambda" {
   type        = "zip"
   source_file = "${path.module}/../functions/upload.py"
-  output_path = "lambda_function_payload.zip"
+  output_path = "${path.module}/lambda_function_payload.zip"
 }
 
 resource "aws_lambda_function" "upload_function" {
-  filename         = "lambda_function_payload.zip"
+  filename         = "${path.module}/lambda_function_payload.zip"
   function_name    = "${var.project_name}_upload_function"
   role             = aws_iam_role.lambda_role.arn
   handler          = "upload.lambda_handler"

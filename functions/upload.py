@@ -36,7 +36,6 @@ def lambda_handler(event, context):
         # Generate a random 4-character hex string for the file ID
         file_id = secrets.token_hex(2)
 
-        body_data = json.loads(event["body"])
         original_filename = body_data["original_filename"]
 
         conditions = [
