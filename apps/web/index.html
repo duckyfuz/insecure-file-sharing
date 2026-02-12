@@ -14,7 +14,7 @@
       content="file sharing, file transfer, online file sharing, share files online"
     />
     <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://ifs.kenf.dev/" />
+    <link rel="canonical" href="https://ifs-app.kenf.dev/" />
 
     <link
       rel="stylesheet"
@@ -472,7 +472,7 @@
             if (!response.ok) {
               return response.text().then((text) => {
                 throw new Error(
-                  `Error fetching presigned URL ($${response.status}): $${
+                  `Error fetching presigned URL (${response.status}): ${
                     text || response.statusText
                   }`,
                 );
@@ -516,7 +516,7 @@
                 } else {
                   reject(
                     new Error(
-                      `Error uploading to S3 ($${xhr.status}): $${
+                      `Error uploading to S3 (${xhr.status}): ${
                         xhr.responseText || xhr.statusText
                       }`,
                     ),
@@ -535,7 +535,7 @@
           .then((fileId) => {
             hideProgress();
             appendLog(
-              `🎉 upload successful!\n     access with code: <strong class="success">$${fileId}</strong>\n     or at <a href="/$${fileId}" target="_blank" rel="noopener noreferrer">https://ifs.kenf.dev/$${fileId}</a>\n`,
+              `🎉 upload successful!\n     access with code: <strong class="success">${fileId}</strong>\n     or at <a href="/${fileId}" target="_blank" rel="noopener noreferrer">https://ifs-app.kenf.dev/${fileId}</a>\n`,
               "success",
             );
             uploadButton.innerHTML = "upload file";
@@ -543,7 +543,7 @@
           })
           .catch((error) => {
             hideProgress();
-            showError(`upload failed: $${error.message}`);
+            showError(`upload failed: ${error.message}`);
           });
       }
 

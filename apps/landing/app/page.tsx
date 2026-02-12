@@ -15,7 +15,7 @@ export default function Home() {
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
           <Link
-            href="https://ifs.kenf.dev"
+            href="https://ifs-app.kenf.dev"
             className="px-6 py-3 text-sm font-medium rounded-lg bg-white text-black hover:bg-zinc-200 transition-colors"
           >
             open app →

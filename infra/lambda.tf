@@ -1,12 +1,12 @@
 data "archive_file" "lambda" {
   type        = "zip"
   source_file = "${path.module}/../functions/upload.py"
-  output_path = "lambda_function_payload.zip"
+  output_path = "${path.module}/lambda_function_payload.zip"
 }
 
 resource "aws_lambda_function" "upload_function" {
-  filename         = "lambda_function_payload.zip"
-  function_name    = "upload_function"
+  filename         = "${path.module}/lambda_function_payload.zip"
+  function_name    = "${var.project_name}_upload_function"
   role             = aws_iam_role.lambda_role.arn
   handler          = "upload.lambda_handler"
   runtime          = "python3.11"
@@ -25,7 +25,7 @@ resource "aws_lambda_function_url" "upload_function_url" {
 
   cors {
     allow_credentials = true
-    allow_origins     = ["https://ifs.kenf.dev"]
+    allow_origins     = ["https://${local.fqdn}"]
     allow_methods     = ["*"]
     allow_headers     = ["*"]
     expose_headers    = ["*"]
