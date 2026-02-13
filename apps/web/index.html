@@ -65,29 +65,30 @@
       }
 
       [data-theme="dark"] {
-        /* Semantic - Dark */
+        /* Semantic - Dark (Zinc Palette) */
         --primary: #6366f1; /* Indigo 500 */
         --primary-hover: #818cf8; /* Indigo 400 */
 
-        --bg-body: linear-gradient(135deg, #111827 0%, #1f2937 100%);
-        --bg-card: #1f2937;
-        --bg-upload: rgba(255, 255, 255, 0.02);
-        --bg-upload-hover: rgba(255, 255, 255, 0.05);
-        --bg-input: #374151;
-        --bg-output: #111827;
+        --bg-body: #0a0a0a; /* Zinc 950 */
+        --bg-card: #171717; /* Zinc 900 */
+        --bg-upload: rgba(255, 255, 255, 0.03);
+        --bg-upload-hover: rgba(255, 255, 255, 0.08);
+        --bg-input: #171717; /* Zinc 900 */
+        --bg-output: #0a0a0a; /* Zinc 950 */
 
-        --text-main: #f9fafb;
-        --text-muted: #d1d5db;
-        --text-placeholder: #9ca3af;
+        --text-main: #ededed; /* Zinc 50ish */
+        --text-muted: #a1a1aa; /* Zinc 400 */
+        --text-placeholder: #71717a; /* Zinc 500 */
 
-        --border-color: #374151;
-        --border-input: #4b5563;
-        --border-upload: #4b5563;
+        --border-color: #27272a; /* Zinc 800 */
+        --border-input: #27272a; /* Zinc 800 */
+        --border-upload: #27272a; /* Zinc 800 shadow alternative */
 
-        --shadow-card: 0 10px 25px rgba(0, 0, 0, 0.3);
+        --shadow-card:
+          0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 
-        --bg-btn-disabled: var(--gray-700);
-        --text-btn-disabled: var(--gray-500);
+        --bg-btn-disabled: #27272a; /* Zinc 800 */
+        --text-btn-disabled: #52525b; /* Zinc 600 */
       }
 
       * {
