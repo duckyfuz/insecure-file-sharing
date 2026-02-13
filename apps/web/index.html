@@ -211,6 +211,58 @@
         }
       }
 
+      .progress-container {
+        display: none;
+        margin-top: 1rem;
+      }
+
+      .progress-track {
+        width: 100%;
+        height: 8px;
+        background-color: var(--gray-200);
+        border-radius: 4px;
+        overflow: hidden;
+      }
+
+      .progress-bar {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, var(--primary), #818cf8);
+        border-radius: 4px;
+        transition: width 0.15s ease;
+        position: relative;
+      }
+
+      .progress-bar::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          rgba(255, 255, 255, 0.3) 50%,
+          transparent 100%
+        );
+        animation: shimmer 1.5s infinite;
+      }
+
+      @keyframes shimmer {
+        0% {
+          transform: translateX(-100%);
+        }
+        100% {
+          transform: translateX(100%);
+        }
+      }
+
+      .progress-info {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        color: var(--gray-700);
+        margin-top: 0.4rem;
+      }
+
       @media (max-width: 768px) {
         .container {
           flex-direction: column;
@@ -267,6 +319,16 @@
         <br />
 
         <button id="uploadButton" class="button" disabled>upload file</button>
+        <div id="progressContainer" class="progress-container">
+          <div class="progress-track">
+            <div id="progressBar" class="progress-bar"></div>
+          </div>
+          <div id="progressInfo" class="progress-info">
+            <span id="progressPercent">0%</span>
+            <span id="progressSize"></span>
+            <span id="progressSpeed"></span>
+          </div>
+        </div>
         <div id="output" class="output"></div>
       </div>
 
@@ -298,6 +360,13 @@
       const outputDiv = document.getElementById("output");
       const fileNameInput = document.getElementById("fileNameInput");
       const accessFileButton = document.getElementById("accessFileButton");
+      const progressContainer = document.getElementById("progressContainer");
+      const progressBar = document.getElementById("progressBar");
+      const progressPercent = document.getElementById("progressPercent");
+      const progressSize = document.getElementById("progressSize");
+      const progressSpeed = document.getElementById("progressSpeed");
+
+      let uploadStartTime = 0;
 
       uploadArea.addEventListener("click", () => fileInput.click());
 
@@ -377,93 +446,105 @@
           return;
         }
 
-        const reader = new FileReader();
-        reader.onload = function (event) {
-          appendLog(`🗃️ processing file: $${file.name}`);
+        appendLog(
+          `🗃️ processing file: $${file.name} ($${formatBytes(file.size)})`,
+        );
 
-          // Get Turnstile token
-          const turnstileToken = turnstile.getResponse();
-          if (!turnstileToken) {
-            showError("please verify you are human.");
-            return;
-          }
+        // Get Turnstile token
+        const turnstileToken = turnstile.getResponse();
+        if (!turnstileToken) {
+          showError("please verify you are human.");
+          return;
+        }
 
-          const payload = {
-            original_filename: file.name,
-            turnstile_token: turnstileToken,
-          };
+        const payload = {
+          original_filename: file.name,
+          turnstile_token: turnstileToken,
+        };
 
-          const apiUrl = "${api_url}";
-          fetch(apiUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-          })
-            .then((response) => {
-              if (!response.ok) {
-                return response.text().then((text) => {
-                  throw new Error(
-                    `Error fetching presigned URL ($${response.status}): $${
-                      text || response.statusText
-                    }`,
-                  );
-                });
-              }
-              return response.json();
-            })
-            .then((data) => {
-              if (
-                !data.upload_url ||
-                !data.upload_url.url ||
-                !data.upload_url.fields ||
-                !data.file_id
-              ) {
-                throw new Error("Invalid presigned URL data received.");
-              }
-              const presignedUrl = data.upload_url.url;
-              const fileId = data.file_id;
-              const formData = new FormData();
-              console.log(data.upload_url.fields);
-              Object.keys(data.upload_url.fields).forEach((key) => {
-                formData.append(key, data.upload_url.fields[key]);
-              });
-              formData.append("file", file);
-              console.log(formData);
-              return fetch(presignedUrl, {
-                method: "POST",
-                body: formData,
-              }).then((uploadResponse) => {
-                return { uploadResponse, fileId };
-              });
-            })
-            .then(({ uploadResponse, fileId }) => {
-              if (uploadResponse.ok) {
-                appendLog(
-                  `🎉 upload successful!\n     access with code: <strong class="success">$${fileId}</strong>\n     or at <a href="/$${fileId}" target="_blank" rel="noopener noreferrer">https://ifs-app.kenf.dev/$${fileId}</a>\n`,
-                  "success",
+        const apiUrl = "${api_url}";
+        fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              return response.text().then((text) => {
+                throw new Error(
+                  `Error fetching presigned URL ($${response.status}): $${
+                    text || response.statusText
+                  }`,
                 );
-                uploadButton.innerHTML = "upload file";
-                resetUploadArea();
-              } else {
-                return uploadResponse.text().then((text) => {
-                  throw new Error(
-                    `Error uploading to S3 ($${uploadResponse.status}): $${
-                      text || uploadResponse.statusText
-                    }`,
-                  );
-                });
-              }
-            })
-            .catch((error) => {
-              showError(`upload failed: $${error.message}`);
+              });
+            }
+            return response.json();
+          })
+          .then((data) => {
+            if (
+              !data.upload_url ||
+              !data.upload_url.url ||
+              !data.upload_url.fields ||
+              !data.file_id
+            ) {
+              throw new Error("Invalid presigned URL data received.");
+            }
+            const presignedUrl = data.upload_url.url;
+            const fileId = data.file_id;
+            const formData = new FormData();
+            Object.keys(data.upload_url.fields).forEach((key) => {
+              formData.append(key, data.upload_url.fields[key]);
             });
-        };
-        reader.onerror = function () {
-          showError("Error reading file.");
-          uploadButton.innerHTML = "upload file";
-          resetUploadArea();
-        };
-        reader.readAsBinaryString(file);
+            formData.append("file", file);
+
+            // Use XHR instead of fetch to track upload progress
+            return new Promise((resolve, reject) => {
+              const xhr = new XMLHttpRequest();
+
+              showProgress();
+              uploadStartTime = Date.now();
+
+              xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) {
+                  updateProgress(e.loaded, e.total);
+                }
+              };
+
+              xhr.onload = () => {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                  resolve(fileId);
+                } else {
+                  reject(
+                    new Error(
+                      `Error uploading to S3 ($${xhr.status}): $${
+                        xhr.responseText || xhr.statusText
+                      }`,
+                    ),
+                  );
+                }
+              };
+
+              xhr.onerror = () => {
+                reject(new Error("Network error during upload."));
+              };
+
+              xhr.open("POST", presignedUrl);
+              xhr.send(formData);
+            });
+          })
+          .then((fileId) => {
+            hideProgress();
+            appendLog(
+              `🎉 upload successful!\n     access with code: <strong class="success">$${fileId}</strong>\n     or at <a href="/$${fileId}" target="_blank" rel="noopener noreferrer">https://ifs-app.kenf.dev/$${fileId}</a>\n`,
+              "success",
+            );
+            uploadButton.innerHTML = "upload file";
+            resetUploadArea();
+          })
+          .catch((error) => {
+            hideProgress();
+            showError(`upload failed: $${error.message}`);
+          });
       }
 
       function showError(message) {
@@ -477,6 +558,46 @@
         fileInput.value = "";
         checkUploadButtonState();
         if (window.turnstile) turnstile.reset();
+      }
+
+      function formatBytes(bytes) {
+        if (bytes === 0) return "0 B";
+        const units = ["B", "KB", "MB", "GB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(1024));
+        return (
+          (bytes / Math.pow(1024, i)).toFixed(i > 0 ? 1 : 0) + " " + units[i]
+        );
+      }
+
+      function showProgress() {
+        progressContainer.style.display = "block";
+        progressBar.style.width = "0%";
+        progressPercent.textContent = "0%";
+        progressSize.textContent = "";
+        progressSpeed.textContent = "";
+      }
+
+      function updateProgress(loaded, total) {
+        const pct = Math.round((loaded / total) * 100);
+        progressBar.style.width = pct + "%";
+        progressPercent.textContent = pct + "%";
+        progressSize.textContent =
+          formatBytes(loaded) + " / " + formatBytes(total);
+
+        const elapsed = (Date.now() - uploadStartTime) / 1000;
+        if (elapsed > 0.5) {
+          const speed = loaded / elapsed;
+          progressSpeed.textContent = formatBytes(speed) + "/s";
+        }
+      }
+
+      function hideProgress() {
+        progressBar.style.width = "100%";
+        progressPercent.textContent = "100%";
+        // Keep visible briefly so user sees completion, then hide
+        setTimeout(() => {
+          progressContainer.style.display = "none";
+        }, 1500);
       }
 
       function checkAccessButtonState() {
