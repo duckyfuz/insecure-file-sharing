@@ -78,11 +78,11 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for instructions on how to set up your 
 ## Sponsors
 
 <a href="https://termius.com">
-  <img src="assets/termius-logo.svg" alt="Termius" height="50">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/termius-logo-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/termius-logo.svg">
+    <img alt="Termius" src="assets/termius-logo.svg" height="50">
+  </picture>
 </a>
 
 [Termius](https://termius.com/) is the #1 SSH client for desktop and mobile.
-
-## License
-
-Apache
