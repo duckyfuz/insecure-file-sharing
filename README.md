@@ -75,6 +75,14 @@ Push to `main` triggers:
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for instructions on how to set up your development environment and submit pull requests.
 
+## Sponsors
+
+<a href="https://termius.com">
+  <img src="assets/termius-logo.svg" alt="Termius" height="50">
+</a>
+
+Termius is the #1 SSH client for desktop and mobile.
+
 ## License
 
 Apache
