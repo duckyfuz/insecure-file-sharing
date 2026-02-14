@@ -27,8 +27,8 @@ User → CloudFront → S3 (static site)
 
 ```
 ├── apps/
-│   ├── web/          # Main app (index.html)
-│   └── landing/      # Landing site
+│   ├── landing/      # Landing site
+│   └── web/          # Main app (index.html)
 ├── functions/
 │   └── upload.py     # Lambda: generates presigned URLs
 ├── infra/            # Terraform infrastructure
