@@ -777,11 +777,13 @@
       const html = document.documentElement;
 
       const savedTheme = localStorage.getItem("theme");
-      const systemPrefersDark = window.matchMedia(
-        "(prefers-color-scheme: dark)",
+      const systemPrefersLight = window.matchMedia(
+        "(prefers-color-scheme: light)",
       ).matches;
 
-      if (savedTheme === "dark" || (!savedTheme && systemPrefersDark)) {
+      if (savedTheme === "light") {
+        html.setAttribute("data-theme", "light");
+      } else {
         html.setAttribute("data-theme", "dark");
       }
 
