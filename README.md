@@ -1,6 +1,6 @@
 # IFS - Insecure File Sharing
 
-![License](https://img.shields.io/badge/license-Apache%202.0-blue)
+![License](https://img.shields.io/badge/license-BSD--3--Clause-blue)
 ![GitHub Actions](https://github.com/duckyfuz/insecure-file-sharing/actions/workflows/deploy.yaml/badge.svg)
 
 A simple, ephemeral file-sharing service. Upload a file, get a 4-character code, share it. Files auto-delete after a day.
