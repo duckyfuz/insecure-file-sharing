@@ -27,17 +27,68 @@
     ></script>
     <style>
       :root {
-        --primary: #4f46e5;
-        --primary-hover: #4338ca;
+        /* Primitives */
         --gray-50: #f9fafb;
         --gray-100: #f3f4f6;
-        --gray-200: #e5e7eb; /* Used for disabled button background */
+        --gray-200: #e5e7eb;
         --gray-300: #d1d5db;
-        --gray-500: #6b7280; /* Can be used for disabled text if --gray-700 is too dark */
-        --gray-700: #374151; /* Used for disabled button text and footer text */
+        --gray-500: #6b7280;
+        --gray-700: #374151;
         --gray-800: #1f2937;
+        --gray-900: #111827;
         --red-500: #ef4444;
         --green-500: #10b981;
+
+        /* Semantic - Light */
+        --primary: #4f46e5;
+        --primary-hover: #4338ca;
+
+        --bg-body: linear-gradient(135deg, #f5f7fa 0%, #eef1f5 100%);
+        --bg-card: #ffffff;
+        --bg-upload: transparent;
+        --bg-upload-hover: var(--gray-50);
+        --bg-input: #ffffff;
+        --bg-output: var(--gray-100);
+
+        --text-main: var(--gray-800);
+        --text-muted: var(--gray-700);
+        --text-placeholder: var(--gray-500);
+
+        --border-color: var(--gray-200);
+        --border-input: var(--gray-300);
+        --border-upload: var(--gray-300);
+
+        --shadow-card: 0 10px 25px rgba(0, 0, 0, 0.05);
+
+        --bg-btn-disabled: var(--gray-200);
+        --text-btn-disabled: var(--gray-700);
+      }
+
+      [data-theme="dark"] {
+        /* Semantic - Dark (Zinc Palette) */
+        --primary: #6366f1; /* Indigo 500 */
+        --primary-hover: #818cf8; /* Indigo 400 */
+
+        --bg-body: #0a0a0a; /* Zinc 950 */
+        --bg-card: #171717; /* Zinc 900 */
+        --bg-upload: rgba(255, 255, 255, 0.03);
+        --bg-upload-hover: rgba(255, 255, 255, 0.08);
+        --bg-input: #171717; /* Zinc 900 */
+        --bg-output: #0a0a0a; /* Zinc 950 */
+
+        --text-main: #ededed; /* Zinc 50ish */
+        --text-muted: #a1a1aa; /* Zinc 400 */
+        --text-placeholder: #71717a; /* Zinc 500 */
+
+        --border-color: #27272a; /* Zinc 800 */
+        --border-input: #27272a; /* Zinc 800 */
+        --border-upload: #27272a; /* Zinc 800 shadow alternative */
+
+        --shadow-card:
+          0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
+        --bg-btn-disabled: #27272a; /* Zinc 800 */
+        --text-btn-disabled: #52525b; /* Zinc 600 */
       }
 
       * {
@@ -52,26 +103,32 @@
           -apple-system,
           BlinkMacSystemFont,
           sans-serif;
-        background: linear-gradient(135deg, #f5f7fa 0%, #eef1f5 100%);
-        color: var(--gray-800);
+        background: var(--bg-body);
+        color: var(--text-main);
         min-height: 100vh;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         line-height: 1.5;
+        transition:
+          background 0.3s,
+          color 0.3s;
       }
 
       .container {
         display: flex;
         max-width: 900px;
         width: 90%;
-        background-color: white;
+        background-color: var(--bg-card);
         border-radius: 16px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        box-shadow: var(--shadow-card);
         overflow: hidden;
         margin-top: auto;
-        margin-bottom: 1rem; /* Add some margin below container before footer */
+        margin-bottom: 1rem;
+        transition:
+          background-color 0.3s,
+          box-shadow 0.3s;
       }
 
       .panel {
@@ -83,18 +140,19 @@
 
       .divider {
         width: 1px;
-        background-color: var(--gray-200);
+        background-color: var(--border-color);
       }
 
       h2 {
         font-weight: 600;
         font-size: 1.5rem;
         margin-bottom: 1.5rem;
-        color: var(--gray-800);
+        color: var(--text-main);
       }
 
       .upload-area {
-        border: 2px dashed var(--gray-300);
+        background-color: var(--bg-upload);
+        border: 2px dashed var(--border-upload);
         border-radius: 8px;
         padding: 2rem;
         text-align: center;
@@ -103,21 +161,23 @@
         cursor: pointer;
         height: 180px;
         width: 100%;
+        display: flex; /* Added display flex to fix layout */
         flex-direction: column;
         justify-content: center;
         align-items: center;
         overflow: hidden;
       }
 
-      .upload-area:hover {
+      .upload-area:hover,
+      .upload-area.drag-over {
         border-color: var(--primary);
-        background-color: var(--gray-50);
+        background-color: var(--bg-upload-hover);
       }
 
       .upload-icon {
         font-size: 2rem;
         margin-bottom: 0.5rem;
-        color: var(--gray-700);
+        color: var(--text-muted);
       }
 
       .file-input {
@@ -145,22 +205,23 @@
 
       .button:disabled,
       .button[disabled] {
-        background-color: var(--gray-200) !important;
-        color: var(--gray-700) !important;
+        background-color: var(--bg-btn-disabled);
+        color: var(--text-btn-disabled);
         cursor: not-allowed;
       }
 
       .button:disabled:hover,
       .button[disabled]:hover {
-        background-color: var(--gray-200) !important;
-        color: var(--gray-700) !important;
+        background-color: var(--bg-btn-disabled);
+        color: var(--text-btn-disabled);
       }
 
       .output {
         margin-top: 1.5rem;
         padding: 1rem;
         border-radius: 8px;
-        background-color: var(--gray-100);
+        background-color: var(--bg-output);
+        color: var(--text-main);
         height: 6rem;
         max-height: 6rem;
         overflow-y: auto;
@@ -180,7 +241,9 @@
       .search-input {
         width: 100%;
         padding: 0.75rem 1rem;
-        border: 1px solid var(--gray-300);
+        background-color: var(--bg-input);
+        color: var(--text-main);
+        border: 1px solid var(--border-input);
         border-radius: 8px;
         font-size: 1rem;
         margin-bottom: 1rem;
@@ -219,7 +282,7 @@
       .progress-track {
         width: 100%;
         height: 8px;
-        background-color: var(--gray-200);
+        background-color: var(--border-color);
         border-radius: 4px;
         overflow: hidden;
       }
@@ -259,7 +322,7 @@
         display: flex;
         justify-content: space-between;
         font-size: 0.8rem;
-        color: var(--gray-700);
+        color: var(--text-muted);
         margin-top: 0.4rem;
       }
 
@@ -285,7 +348,7 @@
         text-align: center;
         padding: 1.5rem;
         font-size: 0.9rem;
-        color: var(--gray-700);
+        color: var(--text-muted);
         margin-top: auto;
         width: 100%;
       }
@@ -300,7 +363,81 @@
       }
     </style>
   </head>
+
   <body>
+    <!-- Theme Toggle -->
+    <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">
+      <svg
+        class="sun-icon"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+        width="20"
+        height="20"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"
+        />
+      </svg>
+      <svg
+        class="moon-icon"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+        width="20"
+        height="20"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"
+        />
+      </svg>
+    </button>
+    <style>
+      .theme-toggle {
+        position: fixed;
+        top: 1.5rem;
+        right: 1.5rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+        padding: 0.5rem;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        transition: all 0.2s;
+      }
+      .theme-toggle:hover {
+        background: var(--bg-upload-hover);
+        transform: translateY(-1px);
+      }
+      .moon-icon {
+        display: none;
+      }
+      .sun-icon {
+        display: block;
+      }
+      [data-theme="dark"] .moon-icon {
+        display: block;
+      }
+      [data-theme="dark"] .sun-icon {
+        display: none;
+      }
+    </style>
+
     <div class="container">
       <div class="panel">
         <h2>upload file</h2>
@@ -388,17 +525,11 @@
       });
 
       function highlight() {
-        uploadArea.style.borderColor = getComputedStyle(
-          document.documentElement,
-        ).getPropertyValue("--primary");
-        uploadArea.style.backgroundColor = getComputedStyle(
-          document.documentElement,
-        ).getPropertyValue("--gray-50");
+        uploadArea.classList.add("drag-over");
       }
 
       function unhighlight() {
-        uploadArea.style.borderColor = "";
-        uploadArea.style.backgroundColor = "";
+        uploadArea.classList.remove("drag-over");
       }
 
       uploadArea.addEventListener("drop", handleDrop, false);
@@ -640,6 +771,28 @@
 
       checkUploadButtonState();
       checkAccessButtonState();
+
+      // Theme logic
+      const themeToggle = document.getElementById("themeToggle");
+      const html = document.documentElement;
+
+      const savedTheme = localStorage.getItem("theme");
+      const systemPrefersLight = window.matchMedia(
+        "(prefers-color-scheme: light)",
+      ).matches;
+
+      if (savedTheme === "light") {
+        html.setAttribute("data-theme", "light");
+      } else {
+        html.setAttribute("data-theme", "dark");
+      }
+
+      themeToggle.addEventListener("click", () => {
+        const currentTheme = html.getAttribute("data-theme");
+        const newTheme = currentTheme === "dark" ? "light" : "dark";
+        html.setAttribute("data-theme", newTheme);
+        localStorage.setItem("theme", newTheme);
+      });
     </script>
     <footer>
       <p>
