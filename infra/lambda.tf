@@ -32,3 +32,8 @@ resource "aws_lambda_function_url" "upload_function_url" {
     max_age           = 86400
   }
 }
+
+resource "aws_cloudwatch_log_group" "upload_function_log_group" {
+  name              = "/aws/lambda/${aws_lambda_function.upload_function.function_name}"
+  retention_in_days = 14
+}
