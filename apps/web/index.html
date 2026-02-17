@@ -361,6 +361,130 @@
       footer a:hover {
         text-decoration: underline;
       }
+      .encryption-options {
+        display: flex;
+        background-color: var(--bg-input);
+        padding: 0.25rem;
+        border-radius: 12px;
+        border: 1px solid var(--border-input);
+        margin-bottom: 1.5rem;
+        position: relative;
+        isolation: isolate;
+      }
+
+      .option-item {
+        flex: 1;
+        position: relative;
+        cursor: pointer;
+        text-align: center;
+        z-index: 1;
+      }
+
+      .option-item input {
+        display: none;
+      }
+
+      .option-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 0.75rem 0.5rem;
+        border-radius: 8px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        color: var(--text-muted);
+        font-weight: 500;
+        font-size: 0.9rem;
+        gap: 0.25rem;
+      }
+
+      .option-icon {
+        font-size: 1.25rem;
+        margin-bottom: 2px;
+      }
+
+      /* Hover effect */
+      .option-item:hover .option-content {
+        color: var(--text-main);
+        background-color: rgba(128, 128, 128, 0.05);
+      }
+
+      /* Selected state */
+      .option-item input:checked + .option-content {
+        background-color: var(--bg-card);
+        color: var(--primary);
+        box-shadow:
+          0 4px 12px rgba(0, 0, 0, 0.05),
+          0 1px 2px rgba(0, 0, 0, 0.05);
+      }
+
+      /* Dark mode adjustment for selected state to make it pop */
+      [data-theme="dark"] .option-item input:checked + .option-content {
+        background-color: var(--gray-800);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        color: var(--primary-hover);
+      }
+
+      .passcode-container {
+        margin-bottom: 1rem;
+        animation: slideDown 0.2s ease-out;
+      }
+
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Download/Decryption Modal */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+      }
+
+      .modal-overlay.active {
+        opacity: 1;
+        pointer-events: all;
+      }
+
+      .modal-card {
+        background: var(--bg-card);
+        padding: 2rem;
+        border-radius: 16px;
+        width: 90%;
+        max-width: 400px;
+        box-shadow: var(--shadow-card);
+        transform: scale(0.95);
+        transition: transform 0.2s;
+      }
+
+      .modal-overlay.active .modal-card {
+        transform: scale(1);
+      }
+
+      .modal-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: var(--text-main);
+      }
     </style>
   </head>
 
@@ -447,6 +571,46 @@
           <input type="file" id="fileInput" class="file-input" />
         </div>
 
+        <!-- Encryption Options -->
+        <div class="encryption-options">
+          <label class="option-item">
+            <input type="radio" name="encryption" value="none" checked />
+            <span class="option-content">
+              <span class="option-icon">🔓</span>
+              <span class="option-text">none</span>
+            </span>
+          </label>
+          <label class="option-item">
+            <input type="radio" name="encryption" value="generated" />
+            <span class="option-content">
+              <span class="option-icon">✨</span>
+              <span class="option-text">secure</span>
+            </span>
+          </label>
+          <label class="option-item">
+            <input type="radio" name="encryption" value="passcode" />
+            <span class="option-content">
+              <span class="option-icon">🔑</span>
+              <span class="option-text">password</span>
+            </span>
+          </label>
+        </div>
+
+        <div
+          id="passcodeContainer"
+          class="passcode-container"
+          style="display: none"
+        >
+          <input
+            type="password"
+            id="uploadPasscode"
+            class="search-input"
+            placeholder="enter a strong password"
+            autocomplete="new-password"
+          />
+        </div>
+        <br />
+
         <!-- Cloudflare Turnstile Widget -->
         <div
           class="cf-turnstile"
@@ -503,7 +667,115 @@
       const progressSize = document.getElementById("progressSize");
       const progressSpeed = document.getElementById("progressSpeed");
 
+      // Encryption UI elements
+      const encryptionRadios = document.getElementsByName("encryption");
+      const passcodeContainer = document.getElementById("passcodeContainer");
+      const uploadPasscode = document.getElementById("uploadPasscode");
+
+      // Decryption UI elements
+      const decryptModal = document.getElementById("decryptModal");
+      const decryptPasscode = document.getElementById("decryptPasscode");
+      const confirmDecryptBtn = document.getElementById("confirmDecryptBtn");
+      const cancelDecryptBtn = document.getElementById("cancelDecryptBtn");
+
       let uploadStartTime = 0;
+      let selectedEncryption = "none";
+
+      // Toggle Passcode Input visibility
+      // Re-query radios in case DOM changed
+      document.querySelectorAll('input[name="encryption"]').forEach((radio) => {
+        radio.addEventListener("change", (e) => {
+          selectedEncryption = e.target.value;
+          passcodeContainer.style.display =
+            selectedEncryption === "passcode" ? "block" : "none";
+
+          // Focus input if passcode selected
+          if (selectedEncryption === "passcode") {
+            setTimeout(() => uploadPasscode.focus(), 50);
+          }
+        });
+      });
+
+      // --- Crypto Utils ---
+
+      const MODE_NONE = 0;
+      const MODE_GENERATED = 1;
+      const MODE_PASSCODE = 2;
+
+      async function generateKey() {
+        return window.crypto.subtle.generateKey(
+          { name: "AES-GCM", length: 256 },
+          true,
+          ["encrypt", "decrypt"],
+        );
+      }
+
+      async function deriveKeyFromPasscode(passcode, salt) {
+        const enc = new TextEncoder();
+        const keyMaterial = await window.crypto.subtle.importKey(
+          "raw",
+          enc.encode(passcode),
+          { name: "PBKDF2" },
+          false,
+          ["deriveKey"],
+        );
+
+        return window.crypto.subtle.deriveKey(
+          {
+            name: "PBKDF2",
+            salt: salt,
+            iterations: 100000,
+            hash: "SHA-256",
+          },
+          keyMaterial,
+          { name: "AES-GCM", length: 256 },
+          true,
+          ["encrypt", "decrypt"],
+        );
+      }
+
+      async function encryptData(file, key) {
+        const iv = window.crypto.getRandomValues(new Uint8Array(12));
+        const fileData = await file.arrayBuffer();
+
+        const encryptedContent = await window.crypto.subtle.encrypt(
+          { name: "AES-GCM", iv: iv },
+          key,
+          fileData,
+        );
+
+        return { encryptedContent, iv };
+      }
+
+      async function decryptData(encryptedData, key, iv) {
+        return window.crypto.subtle.decrypt(
+          { name: "AES-GCM", iv: iv },
+          key,
+          encryptedData,
+        );
+      }
+
+      async function exportKey(key) {
+        const exported = await window.crypto.subtle.exportKey("raw", key);
+        return Array.from(new Uint8Array(exported))
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join("");
+      }
+
+      async function importKey(hexKey) {
+        const keyBytes = new Uint8Array(
+          hexKey.match(/.{1,2}/g).map((byte) => parseInt(byte, 16)),
+        );
+        return window.crypto.subtle.importKey(
+          "raw",
+          keyBytes,
+          "AES-GCM",
+          true,
+          ["encrypt", "decrypt"],
+        );
+      }
+
+      // --- End Crypto Utils ---
 
       uploadArea.addEventListener("click", () => fileInput.click());
 
@@ -560,9 +832,9 @@
 
       uploadButton.addEventListener("click", uploadFile);
 
-      function uploadFile() {
+      async function uploadFile() {
         uploadButton.disabled = true;
-        uploadButton.innerHTML = `<span class="loading"></span>uploading...`;
+        uploadButton.innerHTML = `<span class="loading"></span>processing...`;
 
         const file = fileInput.files[0];
 
@@ -577,8 +849,68 @@
           return;
         }
 
+        // --- Encryption Step ---
+        let payloadBlob = file;
+        let keyStr = ""; // For the URL hash
+        let mode = MODE_NONE;
+
+        try {
+          if (selectedEncryption !== "none") {
+            uploadButton.innerHTML = `<span class="loading"></span>encrypting...`;
+
+            let key;
+            let iv;
+            let salt = new Uint8Array(0); // Empty by default
+            let headerParts = [];
+
+            if (selectedEncryption === "generated") {
+              mode = MODE_GENERATED;
+              key = await generateKey();
+              keyStr = await exportKey(key);
+            } else if (selectedEncryption === "passcode") {
+              const pwd = uploadPasscode.value;
+              if (!pwd) {
+                showError("please enter a password.");
+                return;
+              }
+              mode = MODE_PASSCODE;
+              salt = window.crypto.getRandomValues(new Uint8Array(16));
+              key = await deriveKeyFromPasscode(pwd, salt);
+            }
+
+            // Perform Encryption
+            const result = await encryptData(file, key);
+            iv = result.iv;
+
+            // Construct Header: [Mode (1)] [IV (12)] [Salt (0 or 16)]
+            const modeByte = new Uint8Array([mode]);
+
+            // Combined Blob: Header + Encrypted Data
+            // Note: IV for AES-GCM is typically 12 bytes
+            const parts = [modeByte, iv];
+            if (mode === MODE_PASSCODE) {
+              parts.push(salt);
+            }
+            parts.push(result.encryptedContent);
+
+            payloadBlob = new Blob(parts);
+            appendLog(
+              `🔒 file encrypted locally (${selectedEncryption} mode)`,
+              "success",
+            );
+          } else {
+            // Mode 0 (None) - we still prepend 0x00 so downloader knows it's unencrypted
+            const modeByte = new Uint8Array([MODE_NONE]);
+            payloadBlob = new Blob([modeByte, file]);
+          }
+        } catch (e) {
+          console.error(e);
+          showError("encryption failed: " + e.message);
+          return;
+        }
+
         appendLog(
-          `🗃️ processing file: $${file.name} ($${formatBytes(file.size)})`,
+          `🗃️ uploading: $${file.name} ($${formatBytes(payloadBlob.size)})`,
         );
 
         // Get Turnstile token
@@ -626,7 +958,7 @@
             Object.keys(data.upload_url.fields).forEach((key) => {
               formData.append(key, data.upload_url.fields[key]);
             });
-            formData.append("file", file);
+            formData.append("file", payloadBlob); // Upload the modified blob
 
             // Use XHR instead of fetch to track upload progress
             return new Promise((resolve, reject) => {
@@ -643,7 +975,7 @@
 
               xhr.onload = () => {
                 if (xhr.status >= 200 && xhr.status < 300) {
-                  resolve(fileId);
+                  resolve({ fileId, keyStr });
                 } else {
                   reject(
                     new Error(
@@ -663,10 +995,19 @@
               xhr.send(formData);
             });
           })
-          .then((fileId) => {
+          .then(({ fileId, keyStr }) => {
             hideProgress();
+
+            // Generate Hash-based URL: /#/fileId[:key]
+            const baseUrl = window.location.origin + window.location.pathname;
+            let hashRoute = `/#/${fileId}`;
+            if (keyStr) {
+              hashRoute += `:${keyStr}`;
+            }
+            const fullUrl = baseUrl + hashRoute;
+
             appendLog(
-              `🎉 upload successful!\n     access with code: <strong class="success">$${fileId}</strong>\n     or at <a href="/$${fileId}" target="_blank" rel="noopener noreferrer">https://ifs-app.kenf.dev/$${fileId}</a>\n`,
+              `🎉 upload successful!\n     access: <a href="${hashRoute}" target="_blank" rel="noopener noreferrer">${fullUrl}</a>\n`,
               "success",
             );
             uploadButton.innerHTML = "upload file";
@@ -747,7 +1088,141 @@
           alert("Please enter a file hash.");
           return;
         }
-        window.location.href = "/" + fileName;
+        // Redirect to hash route
+        window.location.hash = "/" + fileName;
+      }
+
+      // Auto-download/decrypt logic
+      // Since this is a static S3 website, we can't use path routing (e.g. /abcd) easily
+      // because S3 will return 404. We must use hash routing (e.g. /#/abcd) or query params.
+      // Let's use hash routing: https://.../#/file-id[#key]
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        // Check for hash format: #/file-id or #/file-id#key
+        // The hash string might look like: "#/abcd" or "#/abcd#key123"
+        // Browsers might handle double hashes weirdly, so let's standardise on:
+        // #/file-id:key  (separator based) OR
+        // just parse the whole string
+
+        const hash = window.location.hash;
+        if (hash && hash.startsWith("#/")) {
+          // Format: #/fileId[:key]
+          const content = hash.substring(2); // remove #/
+          let [fileId, key] = content.split(":");
+
+          if (fileId) {
+            appendLog(`🔍 found file id: $${fileId}`, "normal");
+            await handleDownload(fileId, key);
+          }
+        }
+      });
+
+      async function handleDownload(fileId, keyFromUrl) {
+        appendLog("⬇️ fetching file...", "normal");
+
+        try {
+          // Note: In S3 static hosting, the file is at root /fileId
+          const response = await fetch(`/$${fileId}`);
+
+          if (!response.ok) {
+            throw new Error("File not found or access denied.");
+          }
+
+          const blob = await response.blob();
+          const arrayBuffer = await blob.arrayBuffer();
+          const view = new Uint8Array(arrayBuffer);
+
+          // Check Mode (First Byte)
+          const mode = view[0];
+
+          if (mode === MODE_NONE) {
+            appendLog("🔓 file is not encrypted. downloading...", "success");
+            // Remove the 1-byte header
+            triggerDownload(blob.slice(1), fileId); // simple fallback name
+          } else if (mode === MODE_GENERATED) {
+            appendLog("🔒 file is encrypted (secure link).", "normal");
+
+            if (keyFromUrl) {
+              appendLog("🔑 key found in url. decrypting...", "normal");
+              try {
+                const key = await importKey(keyFromUrl);
+                const iv = view.slice(1, 13);
+                const encryptedData = view.slice(13);
+
+                const decryptedBuffer = await decryptData(
+                  encryptedData,
+                  key,
+                  iv,
+                );
+                appendLog("✅ decryption successful!", "success");
+                triggerDownload(new Blob([decryptedBuffer]), fileId);
+              } catch (e) {
+                showError("decryption failed: invalid key or corrupted file.");
+              }
+            } else {
+              showError("❌ missing decryption key in url.");
+            }
+          } else if (mode === MODE_PASSCODE) {
+            appendLog("🔒 file is password protected.", "normal");
+
+            // Extract salt and IV
+            // Header: [Mode (1)] [IV (12)] [Salt (16)] [Data...]
+            const iv = view.slice(1, 13);
+            const salt = view.slice(13, 29);
+            const encryptedData = view.slice(29);
+
+            // Show Modal
+            decryptModal.classList.add("active");
+
+            // Handle Unlock Click
+            const unlockHandler = async () => {
+              const pwd = decryptPasscode.value;
+              if (!pwd) return;
+
+              confirmDecryptBtn.disabled = true;
+              confirmDecryptBtn.textContent = "unlocking...";
+
+              try {
+                const key = await deriveKeyFromPasscode(pwd, salt);
+                const decryptedBuffer = await decryptData(
+                  encryptedData,
+                  key,
+                  iv,
+                );
+
+                decryptModal.classList.remove("active");
+                appendLog("✅ password accepted. downloading...", "success");
+                triggerDownload(new Blob([decryptedBuffer]), fileId);
+              } catch (e) {
+                confirmDecryptBtn.disabled = false;
+                confirmDecryptBtn.textContent = "unlock";
+                alert("Incorrect password or decryption failed.");
+              }
+            };
+
+            confirmDecryptBtn.onclick = unlockHandler;
+            cancelDecryptBtn.onclick = () =>
+              decryptModal.classList.remove("active");
+          } else {
+            // Unknown mode, maybe legacy file without header?
+            // Try to download as is
+            appendLog("⚠️ unknown file format. downloading raw...", "normal");
+            triggerDownload(blob, fileId);
+          }
+        } catch (e) {
+          showError("download failed: " + e.message);
+        }
+      }
+
+      function triggerDownload(blob, filename) {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename; // We don't have the original filename easily available here without metadata
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
       }
 
       function appendLog(message, type = "normal") {
