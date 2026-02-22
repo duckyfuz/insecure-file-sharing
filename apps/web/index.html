@@ -344,6 +344,33 @@
         }
       }
 
+      .prefix-group {
+        margin-bottom: 1rem;
+      }
+
+      .prefix-label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: var(--text-muted);
+        margin-bottom: 0.4rem;
+      }
+
+      .prefix-optional {
+        font-weight: 400;
+        color: var(--text-placeholder);
+      }
+
+      .prefix-hint {
+        font-size: 0.8rem;
+        color: var(--text-placeholder);
+      }
+
+      .prefix-hint strong {
+        color: var(--primary);
+        font-weight: 600;
+      }
+
       footer {
         text-align: center;
         padding: 1.5rem;
@@ -447,6 +474,24 @@
           <input type="file" id="fileInput" class="file-input" />
         </div>
 
+        <div class="prefix-group">
+          <label for="prefixInput" class="prefix-label"
+            >custom prefix
+            <span class="prefix-optional">(optional)</span></label
+          >
+          <input
+            type="text"
+            id="prefixInput"
+            class="search-input"
+            placeholder="e.g. my-project"
+            maxlength="32"
+            style="margin-bottom: 0.5rem"
+          />
+          <p class="prefix-hint">
+            your code will be <strong id="prefixPreview">abcd</strong>
+          </p>
+        </div>
+
         <!-- Cloudflare Turnstile Widget -->
         <div
           class="cf-turnstile"
@@ -477,7 +522,7 @@
           type="text"
           id="fileNameInput"
           class="search-input"
-          placeholder="enter file hash (e.g., a1b2)"
+          placeholder="enter file code (e.g., a1b2 or my-project-a1b2)"
         />
         <button
           id="accessFileButton"
@@ -502,8 +547,16 @@
       const progressPercent = document.getElementById("progressPercent");
       const progressSize = document.getElementById("progressSize");
       const progressSpeed = document.getElementById("progressSpeed");
+      const prefixInput = document.getElementById("prefixInput");
+      const prefixPreview = document.getElementById("prefixPreview");
 
       let uploadStartTime = 0;
+
+      // Live preview of the prefix
+      prefixInput.addEventListener("input", () => {
+        const val = prefixInput.value.trim();
+        prefixPreview.textContent = val ? `${val}-abcd` : "abcd";
+      });
 
       uploadArea.addEventListener("click", () => fileInput.click());
 
@@ -588,10 +641,14 @@
           return;
         }
 
+        const customPrefix = prefixInput.value.trim();
         const payload = {
           original_filename: file.name,
           turnstile_token: turnstileToken,
         };
+        if (customPrefix) {
+          payload.custom_prefix = customPrefix;
+        }
 
         const apiUrl = "${api_url}";
         fetch(apiUrl, {
@@ -687,6 +744,8 @@
 
       function resetUploadArea() {
         fileInput.value = "";
+        prefixInput.value = "";
+        prefixPreview.textContent = "abcd";
         checkUploadButtonState();
         if (window.turnstile) turnstile.reset();
       }

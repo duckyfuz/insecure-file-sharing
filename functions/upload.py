@@ -1,5 +1,6 @@
 import os
 import json
+import re
 import boto3
 import secrets
 import urllib
@@ -34,7 +35,17 @@ def lambda_handler(event, context):
         bucket_name = "ifs-storage-bucket"
 
         # Generate a random 4-character hex string for the file ID
-        file_id = secrets.token_hex(2)
+        hex_code = secrets.token_hex(2)
+
+        # Support optional custom prefix
+        custom_prefix = body_data.get("custom_prefix", "").strip()
+        if custom_prefix:
+            # Validate prefix: alphanumeric, hyphens, underscores only, max 32 chars
+            if not re.match(r'^[a-zA-Z0-9_-]{1,32}$', custom_prefix):
+                return {"statusCode": 400, "body": "Invalid prefix. Use only letters, numbers, hyphens, and underscores (max 32 chars)."}
+            file_id = f"{custom_prefix}-{hex_code}"
+        else:
+            file_id = hex_code
 
         original_filename = body_data["original_filename"]
 
