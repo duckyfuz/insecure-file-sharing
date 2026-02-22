@@ -1,12 +1,10 @@
 locals {
-  # Use try() to safely handle the case where subdomain_cert doesn't exist (preview mode, count=0).
   acm_dvo                      = try(tolist(aws_acm_certificate.subdomain_cert[0].domain_validation_options)[0], null)
   acm_certificate_record_name  = try(replace(local.acm_dvo.resource_record_name, ".${var.domain}.", ""), "")
   acm_certificate_record_type  = try(local.acm_dvo.resource_record_type, "")
   acm_certificate_record_value = try(substr(local.acm_dvo.resource_record_value, 0, length(local.acm_dvo.resource_record_value) - 1), "")
 }
 
-# DNS validation record for ACM cert — production only
 resource "cloudflare_record" "acm_certificate_cname" {
   count   = var.is_preview ? 0 : 1
   zone_id = var.cloudflare_zone_id
@@ -17,7 +15,6 @@ resource "cloudflare_record" "acm_certificate_cname" {
   proxied = false
 }
 
-# CloudFront CNAME in Cloudflare — production only
 resource "cloudflare_record" "cloudfront_to_subdomain_cname" {
   count   = var.is_preview ? 0 : 1
   zone_id = var.cloudflare_zone_id
@@ -29,7 +26,6 @@ resource "cloudflare_record" "cloudfront_to_subdomain_cname" {
   proxied = true
 }
 
-# Vercel landing page CNAME — production only
 resource "cloudflare_record" "vercel_landing_cname" {
   count   = (!var.is_preview && var.vercel_cname != "") ? 1 : 0
   zone_id = var.cloudflare_zone_id
