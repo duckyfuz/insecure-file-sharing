@@ -56,3 +56,19 @@ variable "vercel_cname" {
   type        = string
   default     = ""
 }
+
+# ─────────────────────────────────────────────────────────────
+# PR PREVIEW: Set by CI for ephemeral preview environments
+# ─────────────────────────────────────────────────────────────
+
+variable "pr_number" {
+  description = "PR number for preview environments. Empty string = production."
+  type        = string
+  default     = ""
+}
+
+variable "is_preview" {
+  description = "Set to true for PR preview environments (skips Cloudflare DNS/ACM cert)."
+  type        = bool
+  default     = false
+}

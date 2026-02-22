@@ -1,5 +1,5 @@
 resource "aws_iam_role" "lambda_role" {
-  name = "${var.project_name}_lambda_role"
+  name = "${local.resource_name}_lambda_role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -16,8 +16,8 @@ resource "aws_iam_role" "lambda_role" {
 }
 
 resource "aws_iam_policy" "allow_s3_access" {
-  name        = "${var.project_name}_s3_access_policy"
-  description = "Grant access to S3 for ${var.project_name}"
+  name        = "${local.resource_name}_s3_access_policy"
+  description = "Grant access to S3 for ${local.resource_name}"
 
   policy = jsonencode({
     "Version" : "2012-10-17",
@@ -46,7 +46,7 @@ resource "aws_iam_role_policy_attachment" "combined_policy_attachment" {
 }
 
 resource "aws_iam_policy" "lambda_logging" {
-  name        = "${var.project_name}_lambda_logging"
+  name        = "${local.resource_name}_lambda_logging"
   path        = "/"
   description = "IAM policy for logging from a lambda"
 
