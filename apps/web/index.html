@@ -555,7 +555,7 @@
       // Live preview of the prefix
       prefixInput.addEventListener("input", () => {
         const val = prefixInput.value.trim();
-        prefixPreview.textContent = val ? `${val}-abcd` : "abcd";
+        prefixPreview.textContent = val ? `$${val}-abcd` : "abcd";
       });
 
       uploadArea.addEventListener("click", () => fileInput.click());
