@@ -1,5 +1,5 @@
 resource "aws_cloudfront_origin_access_identity" "oai" {
-  comment = "OAI for ${local.fqdn}"
+  comment = "OAI for ${local.resource_name}"
 }
 
 resource "aws_cloudfront_distribution" "s3_distribution" {
@@ -16,7 +16,8 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   is_ipv6_enabled     = true
   default_root_object = "index.html"
 
-  aliases = [local.fqdn]
+  # Only set a custom alias in production (alias requires a matching ACM cert)
+  aliases = var.is_preview ? [] : [local.fqdn]
 
   default_cache_behavior {
     allowed_methods  = ["GET", "HEAD"]
@@ -46,13 +47,17 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     }
   }
 
+  # Production: use the ACM cert for the custom domain.
+  # Preview: use the default *.cloudfront.net certificate.
   viewer_certificate {
-    acm_certificate_arn = aws_acm_certificate_validation.cert.certificate_arn
-    ssl_support_method  = "sni-only"
+    acm_certificate_arn            = var.is_preview ? null : aws_acm_certificate_validation.cert[0].certificate_arn
+    ssl_support_method             = var.is_preview ? null : "sni-only"
+    cloudfront_default_certificate = var.is_preview ? true : false
   }
 }
 
 resource "aws_acm_certificate" "subdomain_cert" {
+  count             = var.is_preview ? 0 : 1
   provider          = aws.us-east-1
   domain_name       = local.fqdn
   validation_method = "DNS"
@@ -63,6 +68,7 @@ resource "aws_acm_certificate" "subdomain_cert" {
 }
 
 resource "aws_acm_certificate_validation" "cert" {
+  count           = var.is_preview ? 0 : 1
   provider        = aws.us-east-1
-  certificate_arn = aws_acm_certificate.subdomain_cert.arn
+  certificate_arn = aws_acm_certificate.subdomain_cert[0].arn
 }
