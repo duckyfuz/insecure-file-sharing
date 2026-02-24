@@ -75,7 +75,17 @@ Push to `main` triggers:
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for instructions on how to set up your development environment and submit pull requests.
 
-## Sponsors
+## Supported By
+
+<a href="https://1password.com">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/1password-logo-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/1password-logo.svg">
+    <img alt="1Password" src="assets/1password-logo.svg" height="50">
+  </picture>
+</a>
+
+[1Password](https://1password.com/) is the world's most-loved password manager.
 
 <a href="https://termius.com">
   <picture>
