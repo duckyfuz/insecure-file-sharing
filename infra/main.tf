@@ -26,6 +26,11 @@ terraform {
 }
 
 locals {
-  s3_origin_id = "${var.project_name}-s3-origin"
-  fqdn         = "${var.subdomain}.${var.domain}"
+  s3_origin_id  = "${var.project_name}-s3-origin"
+  name_suffix   = var.is_preview ? "-pr-${var.pr_number}" : ""
+  resource_name = "${var.project_name}${local.name_suffix}"
+
+  # fqdn is only used for production (Cloudflare DNS + ACM cert + CORS origins).
+  # Preview environments use the raw CloudFront domain instead.
+  fqdn = "${var.subdomain}.${var.domain}"
 }
