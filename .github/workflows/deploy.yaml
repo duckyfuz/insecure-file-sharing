@@ -51,7 +51,6 @@ jobs:
       - name: Terraform Plan
         run: terraform plan -var-file=terraform.public.tfvars -no-color -out=tfplan 2>&1 | tee plan_output.txt
         working-directory: ./infra
-        continue-on-error: true
 
       - name: Upload Plan Artifact
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
