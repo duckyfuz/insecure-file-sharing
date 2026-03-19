@@ -51,6 +51,6 @@ resource "cloudflare_turnstile_widget" "ifs_widget_preview" {
   count      = var.is_preview ? 1 : 0
   account_id = var.cloudflare_account_id
   name       = "${local.resource_name} Preview Turnstile Widget"
-  domains    = ["cloudfront.net", "localhost"]
+  domains    = []
   mode       = "managed"
 }

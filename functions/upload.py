@@ -31,7 +31,7 @@ def lambda_handler(event, context):
                 if not result.get("success"):
                     return {"statusCode": 403, "body": "CAPTCHA verification failed"}
 
-        bucket_name = "ifs-storage-bucket"
+        bucket_name = os.environ.get("S3_BUCKET_NAME", "ifs-storage-bucket")
 
         # Generate a random 4-character hex string for the file ID
         file_id = secrets.token_hex(2)
