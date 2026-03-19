@@ -1,11 +1,7 @@
 locals {
   turnstile_site_key = var.is_preview ? cloudflare_turnstile_widget.ifs_widget_preview[0].id : cloudflare_turnstile_widget.ifs_widget[0].id
 
-  # For preview, we cannot reference the CloudFront domain here because it would
-  # create a circular dependency (CloudFront → S3 → CloudFront).
-  # Instead, we use the https://*.cloudfront.net wildcard, which is supported by
-  # S3 CORS and covers all CloudFront distribution domains.
-  cors_origin = var.is_preview ? "https://*.cloudfront.net" : "https://${local.fqdn}"
+  cors_origin = var.is_preview ? "https://${aws_cloudfront_distribution.s3_distribution.domain_name}" : "https://${local.fqdn}"
 
   processed_content = templatefile("${path.module}/../apps/web/index.html", {
     api_url            = aws_lambda_function_url.upload_function_url.function_url
