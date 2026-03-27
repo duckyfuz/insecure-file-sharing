@@ -41,6 +41,7 @@ jobs:
 
       - name: Terraform Apply
         run: |
+          set -o pipefail
           terraform apply \
             -var-file=terraform.public.tfvars \
             -var="pr_number=${{ github.event.pull_request.number }}" \

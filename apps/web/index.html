@@ -723,7 +723,7 @@
           .then((fileId) => {
             hideProgress();
             appendLog(
-              `🎉 upload successful!\n     access with code: <strong class="success">$${fileId}</strong>\n     or at <a href="/$${fileId}" target="_blank" rel="noopener noreferrer">https://ifs-app.kenf.dev/$${fileId}</a>\n`,
+              `🎉 upload successful!\n     access with code: <strong class="success">$${fileId}</strong>\n     or at <a href="/$${fileId}" target="_blank" rel="noopener noreferrer">$${window.location.origin}/$${fileId}</a>\n`,
               "success",
             );
             uploadButton.innerHTML = "upload file";
