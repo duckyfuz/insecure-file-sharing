@@ -57,7 +57,7 @@ resource "aws_s3_bucket_website_configuration" "s3_site_config" {
   }
 }
 
-resource "aws_s3_object" "index_html" {
+resource "aws_s3_object" "web_index_html" {
   bucket       = aws_s3_bucket.main_bucket.bucket
   key          = "index.html"
   content_type = "text/html"
@@ -66,7 +66,7 @@ resource "aws_s3_object" "index_html" {
   content = local.processed_content
 }
 
-resource "aws_s3_object" "web_styles" {
+resource "aws_s3_object" "web_styles_css" {
   bucket       = aws_s3_bucket.main_bucket.bucket
   key          = "styles.css"
   content_type = "text/css"
@@ -75,7 +75,7 @@ resource "aws_s3_object" "web_styles" {
   content = file("${path.module}/../apps/web/styles.css")
 }
 
-resource "aws_s3_object" "web_script" {
+resource "aws_s3_object" "web_app_js" {
   bucket       = aws_s3_bucket.main_bucket.bucket
   key          = "app.js"
   content_type = "application/javascript"
