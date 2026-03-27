@@ -46,11 +46,11 @@ resource "cloudflare_turnstile_widget" "ifs_widget" {
   mode       = "managed"
 }
 
-# Preview Turnstile widget — allows *.cloudfront.net for ephemeral PR environments
+# Preview Turnstile widget
 resource "cloudflare_turnstile_widget" "ifs_widget_preview" {
   count      = var.is_preview ? 1 : 0
   account_id = var.cloudflare_account_id
   name       = "${local.resource_name} Preview Turnstile Widget"
-  domains    = ["cloudfront.net", "localhost"]
+  domains    = [aws_cloudfront_distribution.s3_distribution.domain_name, "localhost"]
   mode       = "managed"
 }
