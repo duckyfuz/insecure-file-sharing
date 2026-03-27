@@ -14,8 +14,8 @@ resource "aws_lambda_function" "upload_function" {
 
   environment {
     variables = {
-      TURNSTILE_SECRET_KEY = var.is_preview ? cloudflare_turnstile_widget.ifs_widget_preview[0].secret : cloudflare_turnstile_widget.ifs_widget[0].secret
-      S3_BUCKET_NAME       = var.is_preview ? "${var.s3_bucket_name}-pr-${var.pr_number}" : var.s3_bucket_name
+      TURNSTILE_SECRET_KEY = local.turnstile_secret_key
+      S3_BUCKET_NAME       = local.bucket_name
     }
   }
 }
@@ -26,7 +26,7 @@ resource "aws_lambda_function_url" "upload_function_url" {
 
   cors {
     allow_credentials = false
-    allow_origins     = [local.cors_origin]
+    allow_origins     = [local.app_url]
     allow_methods     = ["*"]
     allow_headers     = ["*"]
     expose_headers    = ["*"]
