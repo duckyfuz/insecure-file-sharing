@@ -5,7 +5,14 @@ import boto3
 import secrets
 import urllib
 
-s3_client = boto3.client("s3")
+
+def get_s3_client():
+    region = os.environ.get("AWS_REGION", "ap-southeast-1")
+    endpoint_url = f"https://s3.{region}.amazonaws.com"
+    return boto3.client("s3", region_name=region, endpoint_url=endpoint_url)
+
+
+s3_client = get_s3_client()
 
 
 def lambda_handler(event, context):
