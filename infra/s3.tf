@@ -70,6 +70,24 @@ resource "aws_s3_object" "index_html" {
   content = local.processed_content
 }
 
+resource "aws_s3_object" "web_styles" {
+  bucket       = aws_s3_bucket.main_bucket.bucket
+  key          = "styles.css"
+  content_type = "text/css"
+  etag         = md5(file("${path.module}/../apps/web/styles.css"))
+
+  content = file("${path.module}/../apps/web/styles.css")
+}
+
+resource "aws_s3_object" "web_script" {
+  bucket       = aws_s3_bucket.main_bucket.bucket
+  key          = "app.js"
+  content_type = "application/javascript"
+  etag         = md5(file("${path.module}/../apps/web/app.js"))
+
+  content = file("${path.module}/../apps/web/app.js")
+}
+
 resource "aws_s3_bucket_policy" "main_bucket_policy" {
   bucket = aws_s3_bucket.main_bucket.bucket
 
