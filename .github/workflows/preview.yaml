@@ -1,0 +1,193 @@
+name: Preview Environment
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  preview_context:
+    name: Preview Context
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    outputs:
+      pr_number: ${{ steps.preview.outputs.pr_number }}
+      state_key: ${{ steps.preview.outputs.state_key }}
+    steps:
+      - name: Set preview metadata
+        id: preview
+        run: |
+          echo "pr_number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+          echo "state_key=insecure-file-sharing-pr-${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+
+  deploy_preview:
+    name: Deploy Preview
+    runs-on: ubuntu-latest
+    needs: preview_context
+    if: |
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.action != 'closed'
+    environment: preview
+    concurrency:
+      group: pr-preview-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      TF_VAR_pr_number: ${{ needs.preview_context.outputs.pr_number }}
+      TF_VAR_is_preview: "true"
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.0
+
+      - name: Terraform Init (PR-scoped state key)
+        working-directory: ./infra
+        run: |
+          terraform init \
+            -backend-config="key=${{ needs.preview_context.outputs.state_key }}"
+
+      - name: Terraform Apply
+        working-directory: ./infra
+        run: |
+          set -o pipefail
+          terraform apply \
+            -var-file=terraform.public.tfvars \
+            -var="pr_number=${{ needs.preview_context.outputs.pr_number }}" \
+            -var="is_preview=true" \
+            -auto-approve \
+            -no-color 2>&1 | tee apply_output.txt
+
+      - name: Extract Preview URL
+        id: url
+        working-directory: ./infra
+        run: |
+          URL=$(terraform output -raw preview_url)
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
+      - name: Comment Preview URL on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const url = `${{ steps.url.outputs.url }}`;
+            const sha = `${{ github.event.pull_request.head.sha }}`.substring(0, 7);
+            const body = `<!-- pr-preview-comment -->
+            ## Preview Environment Ready
+
+            | | |
+            |---|---|
+            | **Preview URL** | [${url}](${url}) |
+            | **PR** | #${{ github.event.pull_request.number }} |
+            | **Commit** | \`${sha}\` |
+
+            Preview environments are automatically destroyed when this PR is closed.`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+
+            const existing = comments.find((comment) =>
+              comment.body?.includes('<!-- pr-preview-comment -->')
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                comment_id: existing.id,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body,
+              });
+            }
+
+  destroy_preview:
+    name: Destroy Preview
+    runs-on: ubuntu-latest
+    needs: preview_context
+    if: |
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.action == 'closed'
+    concurrency:
+      group: pr-preview-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+    steps:
+      - name: Checkout base branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.base_ref }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.0
+
+      - name: Terraform Init (PR-scoped state key)
+        working-directory: ./infra
+        run: |
+          terraform init \
+            -backend-config="key=${{ needs.preview_context.outputs.state_key }}"
+
+      - name: Terraform Destroy
+        working-directory: ./infra
+        run: |
+          terraform destroy \
+            -var-file=terraform.public.tfvars \
+            -var="pr_number=${{ needs.preview_context.outputs.pr_number }}" \
+            -var="is_preview=true" \
+            -auto-approve \
+            -no-color
+
+      - name: Update PR Comment (destroyed)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = `<!-- pr-preview-comment -->
+            ## Preview Environment Destroyed
+
+            The preview environment for PR #${{ github.event.pull_request.number }} has been torn down.`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+
+            const existing = comments.find((comment) =>
+              comment.body?.includes('<!-- pr-preview-comment -->')
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                comment_id: existing.id,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body,
+              });
+            }

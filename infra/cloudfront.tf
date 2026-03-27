@@ -17,7 +17,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   default_root_object = "index.html"
 
   # Only set a custom alias in production (alias requires a matching ACM cert)
-  aliases = var.is_preview ? [] : [local.fqdn]
+  aliases = var.is_preview ? [] : [local.production_fqdn]
 
   default_cache_behavior {
     allowed_methods  = ["GET", "HEAD"]
@@ -59,7 +59,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 resource "aws_acm_certificate" "subdomain_cert" {
   count             = var.is_preview ? 0 : 1
   provider          = aws.us-east-1
-  domain_name       = local.fqdn
+  domain_name       = local.production_fqdn
   validation_method = "DNS"
 
   lifecycle {

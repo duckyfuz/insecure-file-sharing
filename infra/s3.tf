@@ -1,8 +1,4 @@
 locals {
-  turnstile_site_key = var.is_preview ? cloudflare_turnstile_widget.ifs_widget_preview[0].id : cloudflare_turnstile_widget.ifs_widget[0].id
-
-  cors_origin = var.is_preview ? "https://${aws_cloudfront_distribution.s3_distribution.domain_name}" : "https://${local.fqdn}"
-
   processed_content = templatefile("${path.module}/../apps/web/index.html", {
     api_url            = aws_lambda_function_url.upload_function_url.function_url
     turnstile_site_key = local.turnstile_site_key
@@ -10,7 +6,7 @@ locals {
 }
 
 resource "aws_s3_bucket" "main_bucket" {
-  bucket        = var.is_preview ? "${var.s3_bucket_name}-pr-${var.pr_number}" : var.s3_bucket_name
+  bucket        = local.bucket_name
   force_destroy = true
 }
 
@@ -20,7 +16,7 @@ resource "aws_s3_bucket_cors_configuration" "allow_cors" {
   cors_rule {
     allowed_headers = ["*"]
     allowed_methods = ["PUT", "POST"]
-    allowed_origins = [local.cors_origin]
+    allowed_origins = [local.app_url]
     expose_headers  = ["ETag"]
     max_age_seconds = 3000
   }

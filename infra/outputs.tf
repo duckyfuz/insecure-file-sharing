@@ -3,6 +3,6 @@ output "cloudfront_domain_name" {
 }
 
 output "preview_url" {
-  value       = "https://${aws_cloudfront_distribution.s3_distribution.domain_name}"
-  description = "Direct URL for the preview environment (CloudFront domain)."
+  value       = local.app_url
+  description = "Application URL. For previews this is the CloudFront domain."
 }
