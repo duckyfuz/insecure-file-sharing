@@ -21,3 +21,7 @@ s3_bucket_name = "ifs-storage-bucket"
 # Vercel landing page (leave empty to skip CNAME creation)
 vercel_subdomain = "ifs"
 vercel_cname     = "d756e5009a9b5a81.vercel-dns-017.com"
+
+# Rybbit analytics (leave site ID empty to disable)
+rybbit_site_id = "9db5ca94ab0f"
+rybbit_src     = "https://rybbit.kenf.dev/api/script.js"

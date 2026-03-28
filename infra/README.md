@@ -47,6 +47,8 @@ This directory contains Terraform configuration for deploying IFS to AWS with Cl
    aws_region            = "us-east-1"  # or your preferred region
    project_name          = "ifs"
    s3_bucket_name        = "your-unique-bucket-name"
+   rybbit_site_id        = "" # optional, leave empty to disable analytics
+   rybbit_src            = "https://app.rybbit.io/api/script.js"
    ```
 
 2. **Update `main.tf` backend config** (lines 14-17):
@@ -127,6 +129,8 @@ terraform destroy -var-file=terraform.public.tfvars
 | `aws_region`            | ❌       | `ap-southeast-1`     | AWS region for resources                 |
 | `project_name`          | ❌       | `ifs`                | Prefix for resource names                |
 | `s3_bucket_name`        | ❌       | `ifs-storage-bucket` | S3 bucket name (must be globally unique) |
+| `rybbit_site_id`        | ❌       | `""`                 | Rybbit site ID. Empty disables analytics |
+| `rybbit_src`            | ❌       | `https://app.rybbit.io/api/script.js` | Rybbit script URL |
 
 ## File Structure
 
