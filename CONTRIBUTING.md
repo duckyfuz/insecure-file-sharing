@@ -39,6 +39,8 @@ npm install
 npm run dev
 ```
 
+Analytics for the landing page is configured in `apps/landing/lib/site-config.ts`. If you fork the repo, update the Rybbit values there before deploying.
+
 **Infrastructure:**
 See [infra/README.md](./infra/README.md) for deployment instructions.
 

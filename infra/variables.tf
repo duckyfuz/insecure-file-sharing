@@ -57,6 +57,18 @@ variable "vercel_cname" {
   default     = ""
 }
 
+variable "rybbit_site_id" {
+  description = "Rybbit site ID for opt-in analytics. Leave empty to disable analytics."
+  type        = string
+  default     = ""
+}
+
+variable "rybbit_src" {
+  description = "Rybbit script URL."
+  type        = string
+  default     = "https://app.rybbit.io/api/script.js"
+}
+
 # ─────────────────────────────────────────────────────────────
 # PR PREVIEW: Set by CI for ephemeral preview environments
 # ─────────────────────────────────────────────────────────────
