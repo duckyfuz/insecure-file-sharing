@@ -2,6 +2,7 @@ locals {
   processed_content = templatefile("${path.module}/../apps/web/index.html", {
     api_url            = aws_lambda_function_url.upload_function_url.function_url
     turnstile_site_key = local.turnstile_site_key
+    analytics_script   = var.rybbit_site_id != "" ? "<script src=\"${var.rybbit_src}\" data-site-id=\"${var.rybbit_site_id}\" defer></script>" : ""
   })
 }
 
