@@ -1,8 +1,16 @@
 locals {
+  web_styles_content = file("${path.module}/../apps/web/styles.css")
+  web_app_content    = file("${path.module}/../apps/web/app.js")
+  web_styles_hash    = substr(md5(local.web_styles_content), 0, 8)
+  web_app_hash       = substr(md5(local.web_app_content), 0, 8)
+  web_styles_key     = "styles.${local.web_styles_hash}.css"
+  web_app_key        = "app.${local.web_app_hash}.js"
   processed_content = templatefile("${path.module}/../apps/web/index.html", {
     api_url            = aws_lambda_function_url.upload_function_url.function_url
     turnstile_site_key = local.turnstile_site_key
     analytics_script   = var.rybbit_site_id != "" ? "<script src=\"${var.rybbit_src}\" data-site-id=\"${var.rybbit_site_id}\" defer></script>" : ""
+    styles_asset_path  = local.web_styles_key
+    app_asset_path     = local.web_app_key
   })
 }
 
@@ -59,30 +67,38 @@ resource "aws_s3_bucket_website_configuration" "s3_site_config" {
 }
 
 resource "aws_s3_object" "web_index_html" {
-  bucket       = aws_s3_bucket.main_bucket.bucket
-  key          = "index.html"
-  content_type = "text/html"
-  etag         = md5(local.processed_content)
+  bucket        = aws_s3_bucket.main_bucket.bucket
+  key           = "index.html"
+  content_type  = "text/html"
+  etag          = md5(local.processed_content)
+  cache_control = "no-cache, no-store, must-revalidate"
 
   content = local.processed_content
+
+  depends_on = [
+    aws_s3_object.web_styles_css,
+    aws_s3_object.web_app_js,
+  ]
 }
 
 resource "aws_s3_object" "web_styles_css" {
-  bucket       = aws_s3_bucket.main_bucket.bucket
-  key          = "styles.css"
-  content_type = "text/css"
-  etag         = md5(file("${path.module}/../apps/web/styles.css"))
+  bucket        = aws_s3_bucket.main_bucket.bucket
+  key           = local.web_styles_key
+  content_type  = "text/css"
+  etag          = md5(local.web_styles_content)
+  cache_control = "public, max-age=31536000, immutable"
 
-  content = file("${path.module}/../apps/web/styles.css")
+  content = local.web_styles_content
 }
 
 resource "aws_s3_object" "web_app_js" {
-  bucket       = aws_s3_bucket.main_bucket.bucket
-  key          = "app.js"
-  content_type = "application/javascript"
-  etag         = md5(file("${path.module}/../apps/web/app.js"))
+  bucket        = aws_s3_bucket.main_bucket.bucket
+  key           = local.web_app_key
+  content_type  = "application/javascript"
+  etag          = md5(local.web_app_content)
+  cache_control = "public, max-age=31536000, immutable"
 
-  content = file("${path.module}/../apps/web/app.js")
+  content = local.web_app_content
 }
 
 resource "aws_s3_bucket_policy" "main_bucket_policy" {
