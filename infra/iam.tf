@@ -45,6 +45,30 @@ resource "aws_iam_role_policy_attachment" "combined_policy_attachment" {
   policy_arn = aws_iam_policy.allow_s3_access.arn
 }
 
+resource "aws_iam_policy" "allow_dynamodb_access" {
+  name        = "${local.resource_name}_dynamodb_access_policy"
+  description = "Grant access to DynamoDB counters table for ${local.resource_name}"
+
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "dynamodb:UpdateItem",
+          "dynamodb:GetItem"
+        ],
+        "Resource" : aws_dynamodb_table.counters.arn
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "dynamodb_policy_attachment" {
+  role       = aws_iam_role.lambda_role.name
+  policy_arn = aws_iam_policy.allow_dynamodb_access.arn
+}
+
 resource "aws_iam_policy" "lambda_logging" {
   name        = "${local.resource_name}_lambda_logging"
   path        = "/"
