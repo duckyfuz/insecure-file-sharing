@@ -22,6 +22,32 @@ def get_s3_client():
 
 
 s3_client = get_s3_client()
+ddb_client = boto3.resource("dynamodb")
+ddb_table_name = os.environ.get("DDB_TABLE_NAME", "ifs_counters")
+
+
+def get_counters_table():
+    return ddb_client.Table(ddb_table_name)
+
+
+def increment_counter(counter_name):
+    table = get_counters_table()
+    table.update_item(
+        Key={"counter_name": counter_name},
+        UpdateExpression="ADD #c :inc",
+        ExpressionAttributeNames={"#c": "count"},
+        ExpressionAttributeValues={":inc": 1},
+    )
+
+
+def get_counters():
+    table = get_counters_table()
+    uploads = table.get_item(Key={"counter_name": "uploads"}).get("Item", {})
+    downloads = table.get_item(Key={"counter_name": "downloads"}).get("Item", {})
+    return {
+        "uploads": int(uploads.get("count", 0)),
+        "downloads": int(downloads.get("count", 0)),
+    }
 
 
 def error_response(status_code, message):
@@ -103,28 +129,66 @@ def generate_presigned_upload(bucket_name, file_id, original_filename):
     )
 
 
+def handle_get_counters():
+    try:
+        counters = get_counters()
+        return {
+            "statusCode": 200,
+            "body": json.dumps(counters),
+        }
+    except Exception as error:
+        return error_response(500, f"Error reading counters: {error}")
+
+
+def handle_increment_download():
+    try:
+        increment_counter("downloads")
+        return {"statusCode": 200, "body": json.dumps({"ok": True})}
+    except Exception as error:
+        return error_response(500, f"Error incrementing counter: {error}")
+
+
+def handle_upload(event):
+    body_data = parse_body(event)
+
+    turnstile_error = verify_turnstile_token(body_data.get("turnstile_token"))
+    if turnstile_error:
+        return turnstile_error
+
+    file_id, prefix_error = generate_file_id(body_data.get("custom_prefix", ""))
+    if prefix_error:
+        return prefix_error
+
+    bucket_name = os.environ.get("S3_BUCKET_NAME", "ifs-storage-bucket")
+    original_filename = body_data["original_filename"]
+    presigned_url = generate_presigned_upload(
+        bucket_name, file_id, original_filename
+    )
+
+    try:
+        increment_counter("uploads")
+    except Exception:
+        pass
+
+    return success_response(presigned_url, file_id)
+
+
 def lambda_handler(event, context):
     try:
+        http_method = event.get("requestContext", {}).get("http", {}).get("method", "POST")
+
+        if http_method == "GET":
+            return handle_get_counters()
+
         body_data = parse_body(event)
 
-        turnstile_error = verify_turnstile_token(body_data.get("turnstile_token"))
-        if turnstile_error:
-            return turnstile_error
+        if body_data.get("action") == "increment_download":
+            return handle_increment_download()
 
-        file_id, prefix_error = generate_file_id(body_data.get("custom_prefix", ""))
-        if prefix_error:
-            return prefix_error
-
-        bucket_name = os.environ.get("S3_BUCKET_NAME", "ifs-storage-bucket")
-        original_filename = body_data["original_filename"]
-        presigned_url = generate_presigned_upload(
-            bucket_name, file_id, original_filename
-        )
-
-        return success_response(presigned_url, file_id)
+        return handle_upload(event)
     except Exception as error:
         return error_response(
-            500, f"Error generating presigned URL: {error}"
+            500, f"Error processing request: {error}"
         )
 
 
