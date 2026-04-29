@@ -8,6 +8,8 @@ import urllib
 MAX_FILE_SIZE_BYTES = 524288000
 EXPIRATION_SECONDS = "86400"
 PREFIX_PATTERN = re.compile(r"^[a-zA-Z0-9_-]{1,32}$")
+FILENAME_MAX_LENGTH = 255
+FILENAME_FORBIDDEN = re.compile(r"[\x00-\x1f\x7f]")
 TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
 TAGGING_XML = (
     "<Tagging><TagSet><Tag><Key>expiration</Key>"
@@ -103,10 +105,36 @@ def generate_file_id(custom_prefix):
     return f"{prefix}-{hex_code}", None
 
 
+def validate_filename(filename):
+    if not isinstance(filename, str):
+        return None, error_response(400, "Invalid filename.")
+
+    name = os.path.basename(filename.replace("\\", "/")).strip()
+
+    if not name:
+        return None, error_response(400, "Filename is required.")
+
+    if len(name) > FILENAME_MAX_LENGTH:
+        return None, error_response(
+            400, f"Filename exceeds {FILENAME_MAX_LENGTH} characters."
+        )
+
+    if FILENAME_FORBIDDEN.search(name):
+        return None, error_response(400, "Filename contains invalid characters.")
+
+    return name, None
+
+
+def build_content_disposition(filename):
+    ascii_fallback = re.sub(r'[^\x20-\x7e]', "_", filename)
+    ascii_fallback = ascii_fallback.replace("\\", "").replace('"', "")
+    encoded = urllib.parse.quote(filename, safe="")
+    return f'attachment; filename="{ascii_fallback}"; filename*=UTF-8\'\'{encoded}'
+
+
 def build_upload_fields(original_filename):
-    content_disposition = f'attachment; filename="{original_filename}"'
     return {
-        "Content-Disposition": content_disposition,
+        "Content-Disposition": build_content_disposition(original_filename),
         "tagging": TAGGING_XML,
     }
 
@@ -160,7 +188,11 @@ def handle_upload(event):
         return prefix_error
 
     bucket_name = os.environ.get("S3_BUCKET_NAME", "ifs-storage-bucket")
-    original_filename = body_data["original_filename"]
+    original_filename, filename_error = validate_filename(
+        body_data.get("original_filename", "")
+    )
+    if filename_error:
+        return filename_error
     presigned_url = generate_presigned_upload(
         bucket_name, file_id, original_filename
     )
