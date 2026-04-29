@@ -16,6 +16,7 @@ resource "aws_lambda_function" "upload_function" {
     variables = {
       TURNSTILE_SECRET_KEY = local.turnstile_secret_key
       S3_BUCKET_NAME       = local.bucket_name
+      DDB_TABLE_NAME       = aws_dynamodb_table.counters.name
     }
   }
 }

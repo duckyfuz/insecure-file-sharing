@@ -21,9 +21,11 @@ const prefixInput = document.getElementById("prefixInput");
 const prefixPreview = document.getElementById("prefixPreview");
 const themeToggle = document.getElementById("themeToggle");
 const html = document.documentElement;
+const globalCounters = document.getElementById("globalCounters");
 const { apiUrl } = window.IFS_CONFIG;
 
 let uploadStartTime = 0;
+let counters = { uploads: 0, downloads: 0 };
 
 function preventDefaults(event) {
   event.preventDefault();
@@ -274,6 +276,8 @@ function uploadFile() {
       );
       uploadButton.innerHTML = UPLOAD_IDLE_LABEL;
       resetUploadForm();
+      counters.uploads++;
+      renderCounters();
     })
     .catch((error) => {
       hideProgress();
@@ -292,6 +296,7 @@ function redirectToFile() {
     return;
   }
 
+  incrementDownloadCounter();
   window.location.href = `/${fileName}`;
 }
 
@@ -329,8 +334,31 @@ function initializeEventListeners() {
   });
 }
 
+function renderCounters() {
+  globalCounters.textContent = `${counters.uploads.toLocaleString()} files uploaded \u00b7 ${counters.downloads.toLocaleString()} files downloaded`;
+}
+
+function fetchCounters() {
+  fetch(apiUrl)
+    .then((response) => response.json())
+    .then((data) => {
+      counters = data;
+      renderCounters();
+    })
+    .catch(() => {});
+}
+
+function incrementDownloadCounter() {
+  fetch(apiUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "increment_download" }),
+  }).catch(() => {});
+}
+
 initializeEventListeners();
 updatePrefixPreview();
 updateUploadButtonState();
 updateAccessButtonState();
 initializeTheme();
+fetchCounters();
