@@ -45,7 +45,8 @@ def verify_turnstile_token(turnstile_token):
 
     secret_key = os.environ.get("TURNSTILE_SECRET_KEY")
     if not secret_key:
-        return None
+        print("TURNSTILE_SECRET_KEY is not set")
+        return error_response(500, "Server configuration error")
 
     payload = urllib.parse.urlencode(
         {"secret": secret_key, "response": turnstile_token}
